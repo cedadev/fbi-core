@@ -223,7 +223,7 @@ def fbi_listdir(directory, fetch_size=10000, dirs_only=False, removed=False, hid
     query = {"bool": {"must": must, "must_not": must_not}}
     print(query)
     result = []
-    for item in scan(es, index=indexname, size=fetch_size, query=query, request_timeout=900):
+    for item in scan(es, index=indexname, size=fetch_size, query={"query":query}, request_timeout=900):
         result.append(item)
 
     result.sort(key=lambda q: q["name"])    
