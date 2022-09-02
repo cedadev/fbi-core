@@ -211,7 +211,7 @@ def fbi_listdir(directory, fetch_size=10000, dirs_only=False, removed=False, hid
     """FBI record iterator for a directory"""
     n = 0
     after = ""
-    sort = [{"name.keyword": "asc"}]
+    sort = ["name.keyword"]
     while True:
         must = [{"term": {"directory.keyword": {"value": directory}}}, 
                 {"range": {"name.keyword": {"gt": after}}}]
