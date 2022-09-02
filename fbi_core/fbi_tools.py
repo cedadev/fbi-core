@@ -207,20 +207,26 @@ def make_dirs(directory):
             directory = parent
 
 
-def fbi_listdir(directory, fetch_size=10000, dirs_only=False):
+def fbi_listdir(directory, fetch_size=10000, dirs_only=False, removed=False, hidden=True):
     """FBI record iterator for a directory"""
     n = 0
     after = ""
+    sort = [{"name.keyword": "asc"}]
     while True:
-        query = {"sort" : [{"name.keyword": "asc"}],
-                  "query": {"bool": {"must": [
-                      {"term": {"directory.keyword": {"value": directory}}},
-                      {"range": {"name.keyword": {"gt": after}}}
-                      ]}},
-                  "size": fetch_size}
+        must = [{"term": {"directory.keyword": {"value": directory}}}, 
+                {"range": {"name.keyword": {"gt": after}}}]
         if dirs_only:
-            query["query"]["bool"]["must"].append({"term": {"type": {"value": "dir"}}})
-        result = es.search(index=indexname, body=query, request_timeout=900)
+            must.append({"term": {"type": {"value": "dir"}}})
+        
+        must_not = []
+        if not removed:
+            must_not.append({"exists": {"field": "removed"}})
+        if not hidden:
+            must_not.append({"regexp": {"name.keyword": "[.].*"}})              
+
+        query = {"bool": {"must": must, "must_not": must_not}}
+
+        result = es.search(index=indexname, sort=sort, size=fetch_size, query=query, request_timeout=900)
         nfound = len(result["hits"]["hits"])
         n += nfound
         if nfound == 0:
