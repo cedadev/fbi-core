@@ -221,12 +221,10 @@ def fbi_listdir(directory, fetch_size=10000, dirs_only=False, removed=False, hid
         must_not.append({"regexp": {"name.keyword": "[.].*"}})              
 
     query = {"bool": {"must": must, "must_not": must_not}}
-    print(query)
     result = []
     for item in scan(es, index=indexname, size=fetch_size, query={"query":query}, request_timeout=900):
         result.append(item["_source"])
 
-    print(result)
     result.sort(key=lambda q: q["name"])    
     return result
 
