@@ -30,7 +30,6 @@ def agg_info(path, maxtypes=3, location=None, name_regex=None):
 
     item_types = {"file":0, "link":0, "dir":0}
     item_types.update(dict(info["types"]))
-    print(info["size_stats"], item_types, exts)
     return info["size_stats"], item_types, exts
 
 
