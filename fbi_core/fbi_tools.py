@@ -1,6 +1,7 @@
 from datetime import datetime
 from ceda_es_client import CEDAElasticsearchClient
 import elasticsearch
+from elasticsearch.helpers import scan
 import os
 import hashlib
 import json
@@ -209,35 +210,27 @@ def make_dirs(directory):
 
 def fbi_listdir(directory, fetch_size=10000, dirs_only=False, removed=False, hidden=True):
     """FBI record iterator for a directory"""
-    n = 0
-    after = ""
     sort = ["name.keyword"]
-    while True:
-        must = [{"term": {"directory.keyword": {"value": directory}}}, 
-                {"range": {"name.keyword": {"gt": after}}}]
-        if dirs_only:
-            must.append({"term": {"type": {"value": "dir"}}})
-        
-        must_not = []
-        if not removed:
-            must_not.append({"exists": {"field": "removed"}})
-        if not hidden:
-            must_not.append({"regexp": {"name.keyword": "[.].*"}})              
+    must = [{"term": {"directory.keyword": {"value": directory}}}, 
+            {"range": {"name.keyword": {"gt": after}}}]
+    if dirs_only:
+        must.append({"term": {"type": {"value": "dir"}}})
+    
+    must_not = []
+    if not removed:
+        must_not.append({"exists": {"field": "removed"}})
+    if not hidden:
+        must_not.append({"regexp": {"name.keyword": "[.].*"}})              
 
-        query = {"bool": {"must": must, "must_not": must_not}}
-        print(query)
-        result = es.search(index=indexname, sort=sort, size=fetch_size, query=query, request_timeout=900)
-        nfound = len(result["hits"]["hits"])
-        n += nfound
-        print(n, nfound)
-        if nfound == 0:
-            break
-        else:
-            after = result["hits"]["hits"][-1]["_source"]["name"]
-            print("before yield", after)
-            for record in result["hits"]["hits"]:
-                yield record["_source"]
-            print("after yield", after)
+    query = {"bool": {"must": must, "must_not": must_not}}
+    print(query)
+    result = []
+    for item in scan(es, index=indexname, sort=sort, size=fetch_size, query=query, request_timeout=900):
+        result.append(item)
+
+    result.sort(key=lambda q: q["name"])    
+    return result
+
 
 def insert_item(record):
     """Insert record by replaceing it"""
