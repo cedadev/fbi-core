@@ -229,13 +229,15 @@ def fbi_listdir(directory, fetch_size=10000, dirs_only=False, removed=False, hid
         result = es.search(index=indexname, sort=sort, size=fetch_size, query=query, request_timeout=900)
         nfound = len(result["hits"]["hits"])
         n += nfound
+        print(n, nfound)
         if nfound == 0:
             break
         else:
             after = result["hits"]["hits"][-1]["_source"]["name"]
+            print("before yield", after)
             for record in result["hits"]["hits"]:
                 yield record["_source"]
-
+            print("after yield", after)
 
 def insert_item(record):
     """Insert record by replaceing it"""
