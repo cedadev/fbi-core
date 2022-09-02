@@ -39,7 +39,7 @@ def agg_info(path, maxtypes=3, location=None, name_regex=None):
 @click.option("--maxtypes", help="Max number of common types to display.", default=3)
 @click.option("--location", help="size only for this media type.")
 @click.option("--name_regex", help="Only count files that match a regex.")
-def main(paths, maxtypes, location, name_regex):
+def summary(paths, maxtypes, location, name_regex):
     table = []
     headers = ["Path", "Files", "Dirs", "links", "Size", "Min", "Max", "Avg", "exts"]
     for path in paths:
