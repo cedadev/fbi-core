@@ -225,7 +225,7 @@ def fbi_listdir(directory, fetch_size=10000, dirs_only=False, removed=False, hid
             must_not.append({"regexp": {"name.keyword": "[.].*"}})              
 
         query = {"bool": {"must": must, "must_not": must_not}}
-
+        print(query)
         result = es.search(index=indexname, sort=sort, size=fetch_size, query=query, request_timeout=900)
         nfound = len(result["hits"]["hits"])
         n += nfound
