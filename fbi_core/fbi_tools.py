@@ -211,8 +211,7 @@ def make_dirs(directory):
 def fbi_listdir(directory, fetch_size=10000, dirs_only=False, removed=False, hidden=True):
     """FBI record iterator for a directory"""
     sort = ["name.keyword"]
-    must = [{"term": {"directory.keyword": {"value": directory}}}, 
-            {"range": {"name.keyword": {"gt": after}}}]
+    must = [{"term": {"directory.keyword": {"value": directory}}}]
     if dirs_only:
         must.append({"term": {"type": {"value": "dir"}}})
     
