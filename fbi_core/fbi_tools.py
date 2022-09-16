@@ -193,6 +193,7 @@ def splits(batch_size=10000000):
 
     for d, s, c in merged:
         print(d, s, c)
+    return merged
 
 def make_dirs(directory):
     while True:
