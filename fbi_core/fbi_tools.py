@@ -45,23 +45,25 @@ def fbi_records(after="/", stop="~", fetch_size=10000, exclude_phenomena=False, 
                 yield record["_source"]
 
 
-def ls_query(path, location=None, name_regex=None):
+def where_is(name, fetch_size=10000, removed=False):
+    """retrun records for items named"""
+    query = all_under_query("/", name_regex=name, include_removed=removed)
+    query["size"] = 10000
+    results = es.search(index=indexname, body=query)
+    files = []
+    for r in results["hits"]["hits"]:
+        files.append(r["_source"])
+    return files
+
+
+def ls_query(path, location=None, name_regex=None, 
+             item_type=None, include_removed=False,):
     """ls for fbi"""
-    q4p = {"query": {"bool": {
-            "must": [{"term": {"directory.tree": path}}],
-            "must_not": [{"exists": {"field": "removed"}}]
-            }}}
-
-    if name_regex is not None:
-        q4p["query"]["bool"]["must"].append({"regexp": {"name.keyword": {
-                "value": name_regex, "flags": "ALL",
-                "max_determinized_states": 1000, "rewrite": "constant_score"}}})
-    q4p["size"] = 10000
-    if location is not None:
-        q4p["query"]["bool"]["must"].append({"term": {"location": location}})
-
-    results = es.search(index=indexname, body=q4p)
-
+    query = all_under_query(path, location=location, name_regex=name_regex, 
+                            include_removed=include_removed, item_type=item_type)
+    
+    query["size"] = 10000
+    results = es.search(index=indexname, body=query)
     files = []
     for r in results["hits"]["hits"]:
         files.append(r["_source"])
@@ -81,20 +83,8 @@ def fbi_count(after="/", stop="~", item_type=None):
 def fbi_count_in_dir(directory, item_type=None):
     return fbi_count(after=directory, stop=directory + "/~", item_type=item_type)
 
-@lru_cache(maxsize=1024)
-def fbi_count_in_dir2(directory):
-    """FBI record counter"""
-    if directory == "/":
-        must_query = {"match_all": {}}
-    else:
-        must_query = {"term": {"directory.tree": {"value": directory}}}
-    query = {"query": {"bool": {"must": [must_query], "must_not": [{"exists": {"field": "removed"}}] }}}
-    count = es.count(index=indexname, body=query, request_timeout=900)["count"]
-    return count
-
-
-def archive_summary(path, max_types=5, max_vars=1000, max_exts=10, location=None, name_regex=None, include_removed=False):
-    """find summary info for the archive below a path."""
+def all_under_query(path, location=None, name_regex=None, 
+                    include_removed=False, item_type=None):
     if path == "/":
         must = [{"match_all": {}}]
     else:
@@ -105,6 +95,9 @@ def archive_summary(path, max_types=5, max_vars=1000, max_exts=10, location=None
     else:
         must_not = [{"exists": {"field": "removed"}}]
 
+    if item_type is not None:
+        must.append({"term": {"type": {"value": item_type}}})
+
     if name_regex is not None:
         must.append({"regexp": {"name.keyword": {"value": name_regex, "flags": "ALL",
                     "max_determinized_states": 1000, "rewrite": "constant_score"}}})
@@ -112,7 +105,21 @@ def archive_summary(path, max_types=5, max_vars=1000, max_exts=10, location=None
     if location is not None:
         must.append({"term": {"location": location}})
 
-    query = {"query": {"bool": {"must": must, "must_not": must_not }}}
+    return {"query": {"bool": {"must": must, "must_not": must_not }}}    
+
+@lru_cache(maxsize=1024)
+def fbi_count_in_dir2(directory, item_type=None):
+    """FBI record counter"""
+    query = all_under_query(directory, item_type=item_type)
+    count = es.count(index=indexname, body=query, request_timeout=900)["count"]
+    return count
+
+
+def archive_summary(path, max_types=5, max_vars=1000, max_exts=10, location=None, 
+                    name_regex=None, include_removed=False, item_type=None):
+    """find summary info for the archive below a path."""
+    query = all_under_query(path, location=location, name_regex=name_regex, 
+                            include_removed=include_removed, item_type=item_type)
 
     query["size"] = 0
     query["aggs"] = {"size_stats":{"stats":{"field":"size"}},
@@ -151,47 +158,41 @@ def next_dir(directory):
     return next_dir(parent)         
 
 
-def split(directory, after, batch_size):
-    print(directory, after)
-    # list dir
-    subdirs = []
-
-    for record in fbi_listdir(directory, dirs_only=True):
-        path = record["path"]
-        if path + "~" > after: 
-            subdirs.append(path)
-
-    # for each sub dir count from after to end sub dir:
-    count = fbi_count(after=after, stop = directory)
-    for subdir in subdirs:        
-        count +=  fbi_count_in_dir(subdir)
-        print("- ", subdir, count)    
-        #  if too much then split that dir
-        if count > batch_size: 
-            print(f'recurse subdir {subdir}')
-            return split(subdir, after, batch_size) 
-        #  if enough then return split
-        if count > batch_size * 0.5:
-            print(f'Good batch {count}, {subdir + "~"}')
-            return subdir + "~", count
- 
-    # if still not found enoough return whole directory
-    count = fbi_count(after=after, stop = directory + "~") 
-    print(f'return as could not find enough {directory + "~", count}')
-    return directory + "~", count
-
+def split(splitlist, batch_size):
+    new_splits = []
+    for directory, count in splitlist:
+        if count > batch_size:
+            subdirs = fbi_listdir(directory, dirs_only=True)
+            for subdir in subdirs:
+                subdir_path = subdir["path"]
+                sub_count = fbi_count_in_dir2(subdir_path)
+                new_splits.append((subdir_path, sub_count))
+                count -= sub_count
+        new_splits.append((directory, count))
+    return new_splits
 
 def splits(batch_size=10000000):
-    after = "/"
-    splitlist = []
+    splits = [("/", fbi_count_in_dir2("/"))]
     while True:
-        stop, count = split("/", after, batch_size=batch_size)
-        splitlist.append((after, stop, count))
-        print(f" +++++++ BATCH {after} -> {stop} [{count}]")
-        after = stop
-        if after == "/~": break
-    return splitlist          
+        new_splits = split(splits, batch_size=batch_size)
+        if len(splits) == len(new_splits):
+            break
+        splits = new_splits
+ 
+    splits.sort()
+    merged = []
+    count = 0
+    after = "/"
+    for d, c in splits:
+        if count + c > batch_size:
+            merged.append((after, d, count))
+            after = d
+            count = 0
+        count += c
+    merged.append((after, "~", count))
 
+    for d, s, c in merged:
+        print(d, s, c)
 
 def make_dirs(directory):
     while True:
