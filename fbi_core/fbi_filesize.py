@@ -3,7 +3,7 @@ import click
 import json
 import tabulate
 from .format_utils import sizeof_fmt
-from .fbi_tools import es, indexname, get_record, archive_summary, ls_query
+from .fbi_tools import es, indexname, get_record, archive_summary, ls_query, parameters
 
 
 @click.command()
@@ -67,6 +67,14 @@ def show_record(paths, phenomena):
             del record["phenomena"]
         print(json.dumps(record, indent=4)) 
 
+
+@click.command()
+@click.argument("paths", nargs=-1)
+def show_parameters(paths):
+    for path in paths:
+        print(f" ===== {path} =====")
+        print(parameters(path))
+   
 
 if __name__ == "__main__":
     show_record()

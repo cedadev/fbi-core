@@ -5,6 +5,7 @@ from elasticsearch.helpers import scan
 import os
 import hashlib
 import json
+import re
 from functools import lru_cache
 from .conf import APIKEY
 
@@ -301,6 +302,57 @@ def nla_dirs(after="/", stop="/~", fetch_size=10000):
             for record in result["hits"]["hits"]:
                 yield record["_source"]["directory"]
 
+def parameters(directory, removed=False, hidden=False):
+    """return list of unique parameters under a directory"""
+    parameter_keys = ("standard_name", "var_id", "units", "long_name")
+    must = [{"term": {"directory.tree": {"value": directory}}}]
+    must_not = []
+    if not removed:
+        must_not.append({"exists": {"field": "removed"}})
+    if not hidden:
+        must_not.append({"regexp": {"name.keyword": "[.].*"}})              
+    query = {"bool": {"must": must, "must_not": must_not}}
+
+    aggs = {"parameters": {
+              "terms": {"field": "phenomena.agg_string.keyword", "size": 2000},
+              "aggs": {"object_src": {"top_hits": {"size": 1}}}
+            }}
+ 
+    query = {"bool": {"must": must, "must_not": must_not}}
+    result = es.search(index=indexname, query=query, aggs=aggs, 
+                       size=100, request_timeout=900)
+
+    parameter_aggs = result["aggregations"]["parameters"]
+
+    parameter_dict = {}
+    cf_units_pattern = re.compile("(.*?)\s+[Ss]ince")
+    for bucket in parameter_aggs["buckets"]:
+        agg_string = bucket["key"]
+        phenomena = bucket["object_src"]["hits"]["hits"][0]["_source"]["phenomena"]
+        for phen in phenomena:
+            if phen["agg_string"] == agg_string:
+                var_id = phen.get("var_id")
+                standard_name = phen.get("standard_name")
+                long_name = phen.get("long_name")
+                units = phen.get("units")
+                time_units = (var_id == "time" or standard_name == "time") and units is not None
+
+                if time_units:
+                    m = cf_units_pattern.match(units)
+                    if  m:
+                        units = m.group(1)
+
+                para_key = f"{var_id} | {standard_name} | {long_name} | {units}"
+                parameter = {}
+                if var_id is not None: parameter["var_id"] = var_id
+                if standard_name is not None: parameter["standard_name"] = standard_name
+                if long_name is not None: parameter["long_name"] =long_name
+                if units is not None: parameter["units"] = units
+                
+                parameter_dict[para_key] = parameter
+
+    return list(parameter_dict.values())
+
 if __name__ == "__main__":   
-     splits()
+     parameters("/badc/cmip5")
 
