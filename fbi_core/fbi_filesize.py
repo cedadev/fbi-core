@@ -73,7 +73,7 @@ def show_record(paths, phenomena):
 def show_parameters(paths):
     for path in paths:
         print(f" ===== {path} =====")
-        print(parameters(path))
+        print(json.dumps(parameters(path), indent=4))
    
 
 if __name__ == "__main__":

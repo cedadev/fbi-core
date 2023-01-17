@@ -304,7 +304,6 @@ def nla_dirs(after="/", stop="/~", fetch_size=10000):
 
 def parameters(directory, removed=False, hidden=False):
     """return list of unique parameters under a directory"""
-    parameter_keys = ("standard_name", "var_id", "units", "long_name")
     must = [{"term": {"directory.tree": {"value": directory}}}]
     must_not = []
     if not removed:
@@ -314,7 +313,7 @@ def parameters(directory, removed=False, hidden=False):
     query = {"bool": {"must": must, "must_not": must_not}}
 
     aggs = {"parameters": {
-              "terms": {"field": "phenomena.agg_string.keyword", "size": 2000},
+              "terms": {"field": "phenomena.agg_string.keyword", "size": 10000},
               "aggs": {"object_src": {"top_hits": {"size": 1}}}
             }}
  
