@@ -334,21 +334,22 @@ def parameters(directory, removed=False, hidden=False):
                 standard_name = phen.get("standard_name")
                 long_name = phen.get("long_name")
                 units = phen.get("units")
-                time_units = (var_id == "time" or standard_name == "time") and units is not None
 
-                if time_units:
+                if units is not None:
                     m = cf_units_pattern.match(units)
                     if  m:
                         units = m.group(1)
 
                 para_key = f"{var_id} | {standard_name} | {long_name} | {units}"
-                parameter = {}
-                if var_id is not None: parameter["var_id"] = var_id
-                if standard_name is not None: parameter["standard_name"] = standard_name
-                if long_name is not None: parameter["long_name"] =long_name
-                if units is not None: parameter["units"] = units
-                
-                parameter_dict[para_key] = parameter
+                if para_key not in parameter_dict:
+                    parameter_dict[para_key] = {"file_count": 0}
+                if var_id is not None: parameter_dict[para_key]["var_id"] = var_id
+                if standard_name is not None: parameter_dict[para_key]["standard_name"] = standard_name
+                if long_name is not None: parameter_dict[para_key]["long_name"] =long_name
+                if units is not None: parameter_dict[para_key]["units"] = units
+                parameter_dict[para_key]["file_count"] += bucket["doc_count"]
+              
+                break
 
     return list(parameter_dict.values())
 
