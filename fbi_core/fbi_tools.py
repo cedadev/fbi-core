@@ -318,8 +318,8 @@ def parameters(directory, removed=False, hidden=False):
             }}
  
     query = {"bool": {"must": must, "must_not": must_not}}
-    result = es.search(index=indexname, query=query, aggs=aggs, 
-                       size=100, request_timeout=900)
+    body = {"query": query, "aggs": aggs, "size": 0}
+    result = es.search(index=indexname, body=body, request_timeout=900)
 
     parameter_aggs = result["aggregations"]["parameters"]
 
