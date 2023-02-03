@@ -130,6 +130,8 @@ def convert2datetime(d):
 
 def last_updated(directory):  
     lfile = lastest_file(directory)
+    if lfile is None:
+        return None
     return convert2datetime(lfile["last_modified"])
 
 @lru_cache(maxsize=1024)
