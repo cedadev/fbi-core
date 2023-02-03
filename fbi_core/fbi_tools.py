@@ -96,6 +96,9 @@ def all_under_query(path, location=None, name_regex=None,
     else:
         must_not = [{"exists": {"field": "removed"}}]
 
+    must_not.append({"term": {"name.keyword": {"value": ".ftpaccess" }}})
+    must_not.append({"term": {"name.keyword": {"value": "00README_catalogue_and_licence.txt" }}})
+
     if item_type is not None:
         must.append({"term": {"type": {"value": item_type}}})
 
@@ -107,6 +110,21 @@ def all_under_query(path, location=None, name_regex=None,
         must.append({"term": {"location": location}})
 
     return {"query": {"bool": {"must": must, "must_not": must_not }}}    
+
+def last_updated(directory):
+    """Date of last updated file under a path"""
+    query = all_under_query(directory, item_type="file")
+    query["sort"] = [{"last_modified": {"order": "desc"}}]
+    query["size"] = 1
+    result = es.search(index=indexname, body=query, request_timeout=900)
+    if len(result["hits"]["hits"]) == 0:
+        return None
+    last_mtime = result["hits"]["hits"][0]["_source"]["last_modified"]
+    if isinstance(last_mtime, int):
+        last_mtime = datetime.fromtimestamp(last_mtime)
+    else:
+        last_mtime = datetime.fromisoformat(last_mtime)
+    return last_mtime
 
 @lru_cache(maxsize=1024)
 def fbi_count_in_dir2(directory, item_type=None):

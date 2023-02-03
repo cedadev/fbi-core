@@ -3,7 +3,7 @@ import click
 import json
 import tabulate
 from .format_utils import sizeof_fmt
-from .fbi_tools import es, indexname, get_record, archive_summary, ls_query, parameters
+from .fbi_tools import es, indexname, get_record, archive_summary, ls_query, parameters, last_updated
 
 
 @click.command()
@@ -75,6 +75,13 @@ def show_parameters(paths):
         print(f" ===== {path} =====")
         print(json.dumps(parameters(path), indent=4))
    
+
+@click.command()
+@click.argument("paths", nargs=-1)
+def show_last_updated(paths):
+    for path in paths:
+        print(f"{path}: {last_updated(path)}")
+
 
 if __name__ == "__main__":
     show_record()
