@@ -111,20 +111,26 @@ def all_under_query(path, location=None, name_regex=None,
 
     return {"query": {"bool": {"must": must, "must_not": must_not }}}    
 
-def last_updated(directory):
-    """Date of last updated file under a path"""
+def lastest_file(directory):
+    """latest file record of last updated file under a path"""
     query = all_under_query(directory, item_type="file")
     query["sort"] = [{"last_modified": {"order": "desc"}}]
     query["size"] = 1
     result = es.search(index=indexname, body=query, request_timeout=900)
     if len(result["hits"]["hits"]) == 0:
         return None
-    last_mtime = result["hits"]["hits"][0]["_source"]["last_modified"]
-    if isinstance(last_mtime, int):
-        last_mtime = datetime.fromtimestamp(last_mtime)
+    return result["hits"]["hits"][0]["_source"]
+
+def convert2datetime(d):
+    """Convert a str or int to a datetime"""
+    if isinstance(d, int):
+        return datetime.fromtimestamp(d)
     else:
-        last_mtime = datetime.fromisoformat(last_mtime)
-    return last_mtime
+        return datetime.fromisoformat(d)   
+
+def last_updated(directory):  
+    lfile = lastest_file(directory)
+    return convert2datetime(lfile["last_modified"])
 
 @lru_cache(maxsize=1024)
 def fbi_count_in_dir2(directory, item_type=None):

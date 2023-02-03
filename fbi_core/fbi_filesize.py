@@ -3,7 +3,7 @@ import click
 import json
 import tabulate
 from .format_utils import sizeof_fmt
-from .fbi_tools import es, indexname, get_record, archive_summary, ls_query, parameters, last_updated
+from .fbi_tools import es, indexname, get_record, archive_summary, ls_query, parameters, lastest_file, convert2datetime
 
 
 @click.command()
@@ -78,9 +78,20 @@ def show_parameters(paths):
 
 @click.command()
 @click.argument("paths", nargs=-1)
-def show_last_updated(paths):
+@click.option("-f", "--filenames", help="Show file names of latest files", is_flag=True)
+@click.option("--record", help="Show complete FBI record of latest files", is_flag=True)
+def show_last_updated(paths, filenames, record):
     for path in paths:
-        print(f"{path}: {last_updated(path)}")
+        rec = lastest_file(path)
+        if rec is None:
+            print(f"{path}: No file found.")
+        else:
+            if filenames:
+                print(f'{path}: {convert2datetime(rec["last_modified"])}   [{rec["path"]}]')
+            else:
+                print(f'{path}: {convert2datetime(rec["last_modified"])}')
+            if record:
+                print(json.dumps(rec, indent=4))
 
 
 if __name__ == "__main__":
