@@ -119,7 +119,11 @@ def lastest_file(directory):
     result = es.search(index=indexname, body=query, request_timeout=900)
     if len(result["hits"]["hits"]) == 0:
         return None
-    return result["hits"]["hits"][0]["_source"]
+    last_record = result["hits"]["hits"][0]["_source"]
+    if "last_modified" in last_record:
+        return last_record
+    else:
+        return None
 
 def convert2datetime(d):
     """Convert a str or int to a datetime"""
