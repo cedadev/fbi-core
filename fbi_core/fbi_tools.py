@@ -58,12 +58,12 @@ def where_is(name, fetch_size=10000, removed=False):
 
 
 def ls_query(path, location=None, name_regex=None, 
-             item_type=None, include_removed=False,):
+             item_type=None, include_removed=False, size=10000):
     """ls for fbi"""
     query = all_under_query(path, location=location, name_regex=name_regex, 
                             include_removed=include_removed, item_type=item_type)
     
-    query["size"] = 10000
+    query["size"] = size
     results = es.search(index=indexname, body=query)
     files = []
     for r in results["hits"]["hits"]:
@@ -145,6 +145,16 @@ def fbi_count_in_dir2(directory, item_type=None):
     count = es.count(index=indexname, body=query, request_timeout=900)["count"]
     return count
 
+def get_random(path, number, files, dirs, links):
+    if files:
+        item_type = "file"
+    elif dirs:
+        item_type = "dir"
+    elif links:
+        item_type = "link"
+    else:
+        item_type = None    
+    query = all_under_query(path, item_type=item_type)
 
 def archive_summary(path, max_types=5, max_vars=1000, max_exts=10, location=None, 
                     name_regex=None, include_removed=False, item_type=None):

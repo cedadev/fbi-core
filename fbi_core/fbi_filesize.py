@@ -3,7 +3,7 @@ import click
 import json
 import tabulate
 from .format_utils import sizeof_fmt
-from .fbi_tools import es, indexname, get_record, archive_summary, ls_query, parameters, lastest_file, convert2datetime
+from .fbi_tools import es, indexname, get_record, archive_summary, ls_query, parameters, lastest_file, convert2datetime, get_random
 
 
 @click.command()
@@ -92,6 +92,20 @@ def show_last_updated(paths, filenames, record):
                 print(f'{path}: {convert2datetime(rec["last_modified"])}')
             if record:
                 print(json.dumps(rec, indent=4))
+
+
+@click.command()
+@click.option("-p", "--path", help="Pick paths under this path", default="/")
+@click.option("-n", "--number", help="Pick N paths. Max 10000", type=int, default=20)
+@click.option("-f", "--files", help="only pick files", is_flag=True)
+@click.option("-d", "--dirs", help="only pick dirs", is_flag=True)
+@click.option("-l", "--links", help="only pick links", is_flag=True)
+def random_paths(path, number, files, dirs, links):
+    paths = get_random(path, number, files, dirs, links)
+    for path in paths:
+        print(f"{path}")
+
+ 
 
 
 if __name__ == "__main__":
