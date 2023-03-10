@@ -95,17 +95,25 @@ def show_last_updated(paths, filenames, record):
 
 
 @click.command()
-@click.option("-p", "--path", help="Pick paths under this path", default="/")
+@click.argument("path")
 @click.option("-n", "--number", help="Pick N paths. Max 10000", type=int, default=20)
 @click.option("-f", "--files", help="only pick files", is_flag=True)
 @click.option("-d", "--dirs", help="only pick dirs", is_flag=True)
 @click.option("-l", "--links", help="only pick links", is_flag=True)
-def random_paths(path, number, files, dirs, links):
-    paths = get_random(path, number, files, dirs, links)
+@click.option("-e", "--ext", help="only pick files with extention")
+def random_paths(path, number, files, dirs, links, ext):
+    if files or ext is not None:
+        item_type = "file"
+    elif dirs:
+        item_type = "dir"
+    elif links:
+        item_type = "link"
+    else:
+        item_type = None 
+
+    paths = get_random(path, number, item_type=item_type, ext=ext)
     for path in paths:
         print(f"{path}")
-
- 
 
 
 if __name__ == "__main__":

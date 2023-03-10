@@ -85,7 +85,7 @@ def fbi_count_in_dir(directory, item_type=None):
     return fbi_count(after=directory, stop=directory + "/~", item_type=item_type)
 
 def all_under_query(path, location=None, name_regex=None, 
-                    include_removed=False, item_type=None):
+                    include_removed=False, item_type=None, ext=None):
     if path == "/":
         must = [{"match_all": {}}]
     else:
@@ -101,6 +101,9 @@ def all_under_query(path, location=None, name_regex=None,
 
     if item_type is not None:
         must.append({"term": {"type": {"value": item_type}}})
+
+    if ext is not None:
+        must.append({"term": {"ext": {"value": ext}}})
 
     if name_regex is not None:
         must.append({"regexp": {"name.keyword": {"value": name_regex, "flags": "ALL",
@@ -145,16 +148,16 @@ def fbi_count_in_dir2(directory, item_type=None):
     count = es.count(index=indexname, body=query, request_timeout=900)["count"]
     return count
 
-def get_random(path, number, files, dirs, links):
-    if files:
-        item_type = "file"
-    elif dirs:
-        item_type = "dir"
-    elif links:
-        item_type = "link"
-    else:
-        item_type = None    
-    query = all_under_query(path, item_type=item_type)
+def get_random(path, number, ext=None, item_type=None):   
+    query = all_under_query(path, item_type=item_type, ext=ext)
+    query["random_score"] = {}
+    query["boost_mode"] = "replace"
+    query = {"query": {"function_score": query}, "size": number}
+    results = es.search(index=indexname, body=query, request_timeout=900)
+    paths = []
+    for r in results["hits"]["hits"]:
+        paths.append(r["_source"]["path"])
+    return paths
 
 def archive_summary(path, max_types=5, max_vars=1000, max_exts=10, location=None, 
                     name_regex=None, include_removed=False, item_type=None):
