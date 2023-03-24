@@ -100,9 +100,13 @@ def show_last_updated(paths, filenames, record):
 @click.option("-f", "--files", help="only pick files", is_flag=True)
 @click.option("-d", "--dirs", help="only pick dirs", is_flag=True)
 @click.option("-l", "--links", help="only pick links", is_flag=True)
+@click.option("--on_disk", help="only pick files on disk", is_flag=True)
 @click.option("-e", "--ext", help="only pick files with extention")
-def random_paths(path, number, files, dirs, links, ext):
-    if files or ext is not None:
+@click.option("--since", type=click.DateTime(), help="only pick files modified since a date")
+@click.option("--before", type=click.DateTime(), help="only pick files modified before a date")
+@click.option("--name_regex", help="Only pick files that match a regex.")
+def random_paths(path, number, files, dirs, links, on_disk, ext, since, before, name_regex):
+    if files or on_disk or ext is not None:
         item_type = "file"
     elif dirs:
         item_type = "dir"
@@ -111,7 +115,13 @@ def random_paths(path, number, files, dirs, links, ext):
     else:
         item_type = None 
 
-    paths = get_random(path, number, item_type=item_type, ext=ext)
+    if on_disk:
+        location = "on_disk"
+    else:
+        location = None
+
+    paths = get_random(path, number, item_type=item_type, ext=ext, since=since, 
+                       before=before, location=location, name_regex=name_regex)
     for path in paths:
         print(f"{path}")
 

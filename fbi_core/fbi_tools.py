@@ -85,7 +85,8 @@ def fbi_count_in_dir(directory, item_type=None):
     return fbi_count(after=directory, stop=directory + "/~", item_type=item_type)
 
 def all_under_query(path, location=None, name_regex=None, 
-                    include_removed=False, item_type=None, ext=None):
+                    include_removed=False, item_type=None, ext=None,
+                    since=None, before=None):
     if path == "/":
         must = [{"match_all": {}}]
     else:
@@ -108,6 +109,12 @@ def all_under_query(path, location=None, name_regex=None,
     if name_regex is not None:
         must.append({"regexp": {"name.keyword": {"value": name_regex, "flags": "ALL",
                     "max_determinized_states": 1000, "rewrite": "constant_score"}}})
+
+    if since is not None:
+        must.append({"range": {"last_modified": {"gte": since}}})
+
+    if before is not None:
+        must.append({"range": {"last_modified": {"lte": before}}})
 
     if location is not None:
         must.append({"term": {"location": location}})
@@ -148,8 +155,11 @@ def fbi_count_in_dir2(directory, item_type=None):
     count = es.count(index=indexname, body=query, request_timeout=900)["count"]
     return count
 
-def get_random(path, number, ext=None, item_type=None):   
-    query = all_under_query(path, item_type=item_type, ext=ext)
+def get_random(path, number, ext=None, item_type=None, since=None, before=None, 
+                location=None, name_regex=None):   
+    query = all_under_query(path, item_type=item_type, ext=ext, since=since, before=before,
+                            location=location, name_regex=name_regex)
+    #print(json.dumps(query, indent=4))
     query["random_score"] = {}
     query["boost_mode"] = "replace"
     query = {"query": {"function_score": query}, "size": number}
@@ -274,6 +284,14 @@ def fbi_listdir(directory, fetch_size=10000, dirs_only=False, removed=False, hid
     result.sort(key=lambda q: q["name"])    
     return result
 
+
+def insert_annotation(record_id, record):
+    """Insert annotation record by replaceing it"""
+    try: 
+        es.delete(index=indexname, id=record_id)
+    except elasticsearch.exceptions.NotFoundError:
+        pass 
+    es.index(index=indexname, id=record_id, body=record, request_timeout=100)   
 
 def insert_item(record):
     """Insert record by replaceing it"""
