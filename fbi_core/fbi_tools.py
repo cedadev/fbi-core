@@ -284,6 +284,21 @@ def fbi_listdir(directory, fetch_size=10000, dirs_only=False, removed=False, hid
     result.sort(key=lambda q: q["name"])    
     return result
 
+def dir_annotations(path):
+    query = {"query": { "bool": {"must":   
+                [{"term": {"type": {"value": "dir_annotation"}}}],
+                "should": [], "minimum_should_match": 1}}}
+ 
+    while path != "/":
+        query["query"]["bool"]["should"].append({"term": {"path.keyword":   {"value": path}}})
+        path = os.path.dirname(path)
+
+    results = es.search(index=indexname, body=query, request_timeout=90)
+    records = []
+    for r in results["hits"]["hits"]:
+        records.append(r["_source"])
+    return records
+
 
 def insert_annotation(record_id, record):
     """Insert annotation record by replaceing it"""
