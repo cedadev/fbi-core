@@ -18,8 +18,9 @@ def ls(paths, location, name_regex):
 
 
 
-def agg_info(path, maxtypes=3, location=None, name_regex=None):
-    info = archive_summary(path, max_types=maxtypes, max_exts=maxtypes, location=location, name_regex=name_regex)
+def agg_info(path, maxtypes=3, location=None, name_regex=None, since=None, before=None):
+    info = archive_summary(path, max_types=maxtypes, max_exts=maxtypes, location=location, 
+                           name_regex=name_regex, since=since, before=before)
 
     exts = {}
     for key, value in info["exts"]:
@@ -38,12 +39,14 @@ def agg_info(path, maxtypes=3, location=None, name_regex=None):
 @click.option("--maxtypes", help="Max number of common types to display.", default=3)
 @click.option("--location", help="size only for this media type.")
 @click.option("--name_regex", help="Only count files that match a regex.")
-def summary(paths, maxtypes, location, name_regex):
+@click.option("--since", type=click.DateTime(), help="only pick files modified since a date")
+@click.option("--before", type=click.DateTime(), help="only pick files modified before a date")
+def summary(paths, maxtypes, location, name_regex, since, before):
     table = []
     headers = ["Path", "Files", "Dirs", "links", "Size", "Min", "Max", "Avg", "exts"]
     for path in paths:
         size_stats, item_types, exts = agg_info(path, maxtypes=maxtypes, location=location, 
-                                                name_regex=name_regex)
+                                                name_regex=name_regex, since=since, before=before)
 
         ext_str = ""
         for ext, number in exts.items():
@@ -105,7 +108,8 @@ def show_last_updated(paths, filenames, record):
 @click.option("--since", type=click.DateTime(), help="only pick files modified since a date")
 @click.option("--before", type=click.DateTime(), help="only pick files modified before a date")
 @click.option("--name_regex", help="Only pick files that match a regex.")
-def random_paths(path, number, files, dirs, links, on_disk, ext, since, before, name_regex):
+@click.option("--without", help="Only pick files without this field in the record.")
+def random_paths(path, number, files, dirs, links, on_disk, ext, since, before, name_regex, without):
     if files or on_disk or ext is not None:
         item_type = "file"
     elif dirs:
@@ -121,7 +125,7 @@ def random_paths(path, number, files, dirs, links, on_disk, ext, since, before, 
         location = None
 
     paths = get_random(path, number, item_type=item_type, ext=ext, since=since, 
-                       before=before, location=location, name_regex=name_regex)
+                       before=before, location=location, name_regex=name_regex, without=without)
     for path in paths:
         print(f"{path}")
 

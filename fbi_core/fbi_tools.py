@@ -86,7 +86,7 @@ def fbi_count_in_dir(directory, item_type=None):
 
 def all_under_query(path, location=None, name_regex=None, 
                     include_removed=False, item_type=None, ext=None,
-                    since=None, before=None):
+                    since=None, before=None, without=None):
     if path == "/":
         must = [{"match_all": {}}]
     else:
@@ -96,6 +96,9 @@ def all_under_query(path, location=None, name_regex=None,
         must_not = []
     else:
         must_not = [{"exists": {"field": "removed"}}]
+
+    if without:
+        must_not.append({"exists": {"field": without}})
 
     must_not.append({"term": {"name.keyword": {"value": ".ftpaccess" }}})
     must_not.append({"term": {"name.keyword": {"value": "00README_catalogue_and_licence.txt" }}})
@@ -156,9 +159,9 @@ def fbi_count_in_dir2(directory, item_type=None):
     return count
 
 def get_random(path, number, ext=None, item_type=None, since=None, before=None, 
-                location=None, name_regex=None):   
+                location=None, name_regex=None, without=None):   
     query = all_under_query(path, item_type=item_type, ext=ext, since=since, before=before,
-                            location=location, name_regex=name_regex)
+                            location=location, name_regex=name_regex, without=without)
     #print(json.dumps(query, indent=4))
     query["random_score"] = {}
     query["boost_mode"] = "replace"
@@ -170,10 +173,12 @@ def get_random(path, number, ext=None, item_type=None, since=None, before=None,
     return paths
 
 def archive_summary(path, max_types=5, max_vars=1000, max_exts=10, location=None, 
-                    name_regex=None, include_removed=False, item_type=None):
+                    name_regex=None, include_removed=False, item_type=None, 
+                    since=None, before=None,):
     """find summary info for the archive below a path."""
     query = all_under_query(path, location=location, name_regex=name_regex, 
-                            include_removed=include_removed, item_type=item_type)
+                            include_removed=include_removed, item_type=item_type,
+                            since=since, before=before,)
 
     query["size"] = 0
     query["aggs"] = {"size_stats":{"stats":{"field":"size"}},
