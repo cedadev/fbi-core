@@ -99,17 +99,19 @@ def show_last_updated(paths, filenames, record):
 
 @click.command()
 @click.argument("path")
-@click.option("-n", "--number", help="Pick N paths. Max 10000", type=int, default=20)
+@click.option("-n", "--number", metavar="N", help="Pick N paths. Max 10000", type=int, default=20)
 @click.option("-f", "--files", help="only pick files", is_flag=True)
 @click.option("-d", "--dirs", help="only pick dirs", is_flag=True)
 @click.option("-l", "--links", help="only pick links", is_flag=True)
 @click.option("--on_disk", help="only pick files on disk", is_flag=True)
-@click.option("-e", "--ext", help="only pick files with extention")
+@click.option("-e", "--ext", metavar="EXT", help="only pick files with extention")
 @click.option("--since", type=click.DateTime(), help="only pick files modified since a date")
 @click.option("--before", type=click.DateTime(), help="only pick files modified before a date")
-@click.option("--name_regex", help="Only pick files that match a regex.")
-@click.option("--without", help="Only pick files without this field in the record.")
-def random_paths(path, number, files, dirs, links, on_disk, ext, since, before, name_regex, without):
+@click.option("--name_regex", metavar="REGEX", help="Only pick files that match a regex.")
+@click.option("--without", metavar="FIELD", help="Only pick files without this field in the record.")
+@click.option("--maxsize", type=int, metavar='SIZE', help="Only pick files with size less then SIZE.")
+@click.option("--minsize", type=int, metavar='SIZE', help="Only pick files with size greater then SIZE.")
+def random_paths(path, number, files, dirs, links, on_disk, ext, since, before, name_regex, without, maxsize, minsize):
     if files or on_disk or ext is not None:
         item_type = "file"
     elif dirs:
@@ -125,7 +127,8 @@ def random_paths(path, number, files, dirs, links, on_disk, ext, since, before, 
         location = None
 
     paths = get_random(path, number, item_type=item_type, ext=ext, since=since, 
-                       before=before, location=location, name_regex=name_regex, without=without)
+                       before=before, location=location, name_regex=name_regex, without=without,
+                       maxsize=maxsize, minsize=minsize)
     for path in paths:
         print(f"{path}")
 

@@ -86,7 +86,7 @@ def fbi_count_in_dir(directory, item_type=None):
 
 def all_under_query(path, location=None, name_regex=None, 
                     include_removed=False, item_type=None, ext=None,
-                    since=None, before=None, without=None):
+                    since=None, before=None, without=None, maxsize=None, minsize=None):
     if path == "/":
         must = [{"match_all": {}}]
     else:
@@ -108,6 +108,12 @@ def all_under_query(path, location=None, name_regex=None,
 
     if ext is not None:
         must.append({"term": {"ext": {"value": ext}}})
+
+    if maxsize is not None:
+        must.append({"range": {"size": {"lte": maxsize}}})
+
+    if minsize is not None:
+        must.append({"range": {"size": {"gte": minsize}}})
 
     if name_regex is not None:
         must.append({"regexp": {"name.keyword": {"value": name_regex, "flags": "ALL",
@@ -159,9 +165,11 @@ def fbi_count_in_dir2(directory, item_type=None):
     return count
 
 def get_random(path, number, ext=None, item_type=None, since=None, before=None, 
-                location=None, name_regex=None, without=None):   
+                location=None, name_regex=None, without=None,
+                maxsize=None, minsize=None):   
     query = all_under_query(path, item_type=item_type, ext=ext, since=since, before=before,
-                            location=location, name_regex=name_regex, without=without)
+                            location=location, name_regex=name_regex, without=without,
+                            maxsize=maxsize, minsize=minsize)
     #print(json.dumps(query, indent=4))
     query["random_score"] = {}
     query["boost_mode"] = "replace"
