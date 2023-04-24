@@ -6,21 +6,40 @@ from .format_utils import sizeof_fmt
 from .fbi_tools import es, indexname, get_record, archive_summary, ls_query, parameters, lastest_file, convert2datetime, get_random
 
 
-@click.command()
+
+class FilterCommand(click.Command):
+    """class to add standard options to command line tools"""
+    # standard options are: item_type, location, ext, since, before, name_regex, without, maxsize, minsize
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        options = [click.core.Option(("-t", "--item-type"), 
+                                     type=click.Choice(['file', 'dir', 'link'], case_sensitive=False), 
+                                     help="only pick items of this type"),
+            click.core.Option(("--location",), type=click.Choice(['on_disk', 'on_tape'], case_sensitive=False), 
+                                     help="only pick files stored on disk or tape"),
+            click.core.Option(("-e", "--ext"), metavar="EXT", help="only pick files with extention"),
+            click.core.Option(("--since",), type=click.DateTime(), help="only pick files modified since a date"),
+            click.core.Option(("--before",), type=click.DateTime(), help="only pick files modified before a date"),
+            click.core.Option(("--name_regex",), metavar="REGEX", help="Only pick files that match a regex."),
+            click.core.Option(("--without",), metavar="FIELD", help="Only pick files without this field in the record."),
+            click.core.Option(("--maxsize",), type=int, metavar='SIZE', help="Only pick files with size less then SIZE."),
+            click.core.Option(("--minsize",), type=int, metavar='SIZE', help="Only pick files with size greater then SIZE.")]
+
+        for o in reversed(options):
+            self.params.insert(0, o)
+
+
+@click.command(cls=FilterCommand)
 @click.argument("paths", nargs=-1)
-@click.option("--location", help="size only for this media type.")
-@click.option("--name_regex", help="Only count files that match a regex.")
-def ls(paths, location, name_regex):
+def ls(paths, **kwargs):
     for path in paths:
-        files = ls_query(path, location=location, name_regex=name_regex)
+        files = ls_query(path, **kwargs)
         for f in files:
             print(f["path"])
 
 
-
-def agg_info(path, maxtypes=3, location=None, name_regex=None, since=None, before=None):
-    info = archive_summary(path, max_types=maxtypes, max_exts=maxtypes, location=location, 
-                           name_regex=name_regex, since=since, before=before)
+def agg_info(path, maxtypes=3, **kwargs):
+    info = archive_summary(path, max_types=maxtypes, max_exts=maxtypes, **kwargs)
 
     exts = {}
     for key, value in info["exts"]:
@@ -34,19 +53,14 @@ def agg_info(path, maxtypes=3, location=None, name_regex=None, since=None, befor
     return info["size_stats"], item_types, exts
 
 
-@click.command()
+@click.command(cls=FilterCommand)
 @click.argument("paths", nargs=-1)
 @click.option("--maxtypes", help="Max number of common types to display.", default=3)
-@click.option("--location", help="size only for this media type.")
-@click.option("--name_regex", help="Only count files that match a regex.")
-@click.option("--since", type=click.DateTime(), help="only pick files modified since a date")
-@click.option("--before", type=click.DateTime(), help="only pick files modified before a date")
-def summary(paths, maxtypes, location, name_regex, since, before):
+def summary(paths, maxtypes, **kwargs):
     table = []
     headers = ["Path", "Files", "Dirs", "links", "Size", "Min", "Max", "Avg", "exts"]
     for path in paths:
-        size_stats, item_types, exts = agg_info(path, maxtypes=maxtypes, location=location, 
-                                                name_regex=name_regex, since=since, before=before)
+        size_stats, item_types, exts = agg_info(path, maxtypes=maxtypes, **kwargs)
 
         ext_str = ""
         for ext, number in exts.items():
@@ -97,38 +111,13 @@ def show_last_updated(paths, filenames, record):
                 print(json.dumps(rec, indent=4))
 
 
-@click.command()
+@click.command(cls=FilterCommand)
 @click.argument("path")
 @click.option("-n", "--number", metavar="N", help="Pick N paths. Max 10000", type=int, default=20)
-@click.option("-f", "--files", help="only pick files", is_flag=True)
-@click.option("-d", "--dirs", help="only pick dirs", is_flag=True)
-@click.option("-l", "--links", help="only pick links", is_flag=True)
-@click.option("--on_disk", help="only pick files on disk", is_flag=True)
-@click.option("-e", "--ext", metavar="EXT", help="only pick files with extention")
-@click.option("--since", type=click.DateTime(), help="only pick files modified since a date")
-@click.option("--before", type=click.DateTime(), help="only pick files modified before a date")
-@click.option("--name_regex", metavar="REGEX", help="Only pick files that match a regex.")
-@click.option("--without", metavar="FIELD", help="Only pick files without this field in the record.")
-@click.option("--maxsize", type=int, metavar='SIZE', help="Only pick files with size less then SIZE.")
-@click.option("--minsize", type=int, metavar='SIZE', help="Only pick files with size greater then SIZE.")
-def random_paths(path, number, files, dirs, links, on_disk, ext, since, before, name_regex, without, maxsize, minsize):
-    if files or on_disk or ext is not None:
-        item_type = "file"
-    elif dirs:
-        item_type = "dir"
-    elif links:
-        item_type = "link"
-    else:
-        item_type = None 
+def random_paths(path, number, **kwargs):
+    """Pick a set of random files from the CEDA Archive using the FBI."""
 
-    if on_disk:
-        location = "on_disk"
-    else:
-        location = None
-
-    paths = get_random(path, number, item_type=item_type, ext=ext, since=since, 
-                       before=before, location=location, name_regex=name_regex, without=without,
-                       maxsize=maxsize, minsize=minsize)
+    paths = get_random(path, number, **kwargs)
     for path in paths:
         print(f"{path}")
 

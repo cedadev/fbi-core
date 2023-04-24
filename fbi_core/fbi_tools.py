@@ -57,11 +57,9 @@ def where_is(name, fetch_size=10000, removed=False):
     return files
 
 
-def ls_query(path, location=None, name_regex=None, 
-             item_type=None, include_removed=False, size=10000):
+def ls_query(path, include_removed=False, size=10000, **kwargs):
     """ls for fbi"""
-    query = all_under_query(path, location=location, name_regex=name_regex, 
-                            include_removed=include_removed, item_type=item_type)
+    query = all_under_query(path, include_removed=include_removed, **kwargs)
     
     query["size"] = size
     results = es.search(index=indexname, body=query)
@@ -164,12 +162,8 @@ def fbi_count_in_dir2(directory, item_type=None):
     count = es.count(index=indexname, body=query, request_timeout=900)["count"]
     return count
 
-def get_random(path, number, ext=None, item_type=None, since=None, before=None, 
-                location=None, name_regex=None, without=None,
-                maxsize=None, minsize=None):   
-    query = all_under_query(path, item_type=item_type, ext=ext, since=since, before=before,
-                            location=location, name_regex=name_regex, without=without,
-                            maxsize=maxsize, minsize=minsize)
+def get_random(path, number, **kwargs):   
+    query = all_under_query(path, **kwargs)
     #print(json.dumps(query, indent=4))
     query["random_score"] = {}
     query["boost_mode"] = "replace"
@@ -180,13 +174,10 @@ def get_random(path, number, ext=None, item_type=None, since=None, before=None,
         paths.append(r["_source"]["path"])
     return paths
 
-def archive_summary(path, max_types=5, max_vars=1000, max_exts=10, location=None, 
-                    name_regex=None, include_removed=False, item_type=None, 
-                    since=None, before=None,):
+def archive_summary(path, max_types=5, max_vars=1000, max_exts=10,  
+                    include_removed=False, **kwargs):
     """find summary info for the archive below a path."""
-    query = all_under_query(path, location=location, name_regex=name_regex, 
-                            include_removed=include_removed, item_type=item_type,
-                            since=since, before=before,)
+    query = all_under_query(path, include_removed=include_removed, **kwargs)
 
     query["size"] = 0
     query["aggs"] = {"size_stats":{"stats":{"field":"size"}},
