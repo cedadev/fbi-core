@@ -127,7 +127,7 @@ def all_under_query(path, location=None, name_regex=None,
         must.append({"range": {"last_modified": {"lte": before}}})
 
     if audited_before is not None:
-        must.append({"range": {"audited": {"lte": audited_before}}})
+        must.append({"range": {"last_audit": {"lte": audited_before}}})
 
     if location is not None:
         must.append({"term": {"location": location}})
