@@ -84,7 +84,8 @@ def fbi_count_in_dir(directory, item_type=None):
 
 def all_under_query(path, location=None, name_regex=None, 
                     include_removed=False, item_type=None, ext=None,
-                    since=None, before=None, with_field=None, without=None, maxsize=None, minsize=None):
+                    since=None, before=None, with_field=None, without=None, maxsize=None, minsize=None,
+                    audited_before=None):
     if path == "/":
         must = [{"match_all": {}}]
     else:
@@ -125,6 +126,9 @@ def all_under_query(path, location=None, name_regex=None,
     if before is not None:
         must.append({"range": {"last_modified": {"lte": before}}})
 
+    if audited_before is not None:
+        must.append({"range": {"audited": {"lte": audited_before}}})
+
     if location is not None:
         must.append({"term": {"location": location}})
 
@@ -164,17 +168,21 @@ def fbi_count_in_dir2(directory, item_type=None):
     count = es.count(index=indexname, body=query, request_timeout=900)["count"]
     return count
 
-def get_random(path, number, **kwargs):   
+def get_random_records(path, number, **kwargs):   
     query = all_under_query(path, **kwargs)
     #print(json.dumps(query, indent=4))
     query["random_score"] = {}
     query["boost_mode"] = "replace"
     query = {"query": {"function_score": query}, "size": number}
     results = es.search(index=indexname, body=query, request_timeout=900)
-    paths = []
+    recs = []
     for r in results["hits"]["hits"]:
-        paths.append(r["_source"]["path"])
-    return paths
+        recs.append(r["_source"])
+    return recs
+
+def get_random(path, number, **kwargs): 
+    recs = get_random_records(path, number, **kwargs)
+    return list(map(lambda x: x["path"], recs))
 
 def archive_summary(path, max_types=5, max_vars=1000, max_exts=10,  
                     include_removed=False, **kwargs):
