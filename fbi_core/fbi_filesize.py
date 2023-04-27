@@ -22,6 +22,7 @@ class FilterCommand(click.Command):
             click.core.Option(("--before",), type=click.DateTime(), help="only pick files modified before a date"),
             click.core.Option(("--name_regex",), metavar="REGEX", help="Only pick files that match a regex."),
             click.core.Option(("--without",), metavar="FIELD", help="Only pick files without this field in the record."),
+            click.core.Option(("--with-field",), metavar="FIELD", help="Only pick files with this field in the record."),
             click.core.Option(("--maxsize",), type=int, metavar='SIZE', help="Only pick files with size less then SIZE."),
             click.core.Option(("--minsize",), type=int, metavar='SIZE', help="Only pick files with size greater then SIZE.")]
 
