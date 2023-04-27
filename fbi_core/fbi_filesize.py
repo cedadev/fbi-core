@@ -24,8 +24,8 @@ class FilterCommand(click.Command):
             click.core.Option(("--without",), metavar="FIELD", help="Only pick files without this field in the record."),
             click.core.Option(("--with-field",), metavar="FIELD", help="Only pick files with this field in the record."),
             click.core.Option(("--maxsize",), type=int, metavar='SIZE', help="Only pick files with size less then SIZE."),
-            click.core.Option(("--minsize",), type=int, metavar='SIZE', help="Only pick files with size greater then SIZE.")]
-
+            click.core.Option(("--minsize",), type=int, metavar='SIZE', help="Only pick files with size greater then SIZE."),
+            click.core.Option(("--include_removed",), is_flag=True, show_default=True, help="inculde removed items.")]
         for o in reversed(options):
             self.params.insert(0, o)
 
