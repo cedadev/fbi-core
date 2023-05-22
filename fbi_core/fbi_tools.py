@@ -170,7 +170,7 @@ def fbi_count_in_dir2(directory, item_type=None):
 
 def get_random_records(path, number, **kwargs):   
     query = all_under_query(path, **kwargs)
-    print(json.dumps(query, indent=4))
+    # print(json.dumps(query, indent=4))
     query["random_score"] = {}
     query["boost_mode"] = "replace"
     query = {"query": {"function_score": query}, "size": number}
