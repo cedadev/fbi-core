@@ -84,7 +84,8 @@ def fbi_count_in_dir(directory, item_type=None):
 
 def all_under_query(path, location=None, name_regex=None, 
                     include_removed=False, item_type=None, ext=None,
-                    since=None, before=None, with_field=None, without=None, maxsize=None, minsize=None,
+                    since=None, before=None, with_field=None, without=None, blank=None, 
+                    maxsize=None, minsize=None,
                     audited_before=None):
     if path == "/":
         must = [{"match_all": {}}]
@@ -100,6 +101,8 @@ def all_under_query(path, location=None, name_regex=None,
         must_not.append({"exists": {"field": without}})
     if with_field:
         must.append({"exists": {"field": with_field}})
+    if blank:
+        must.append({"term": {blank: {"value": ""}}})
 
     must_not.append({"term": {"name.keyword": {"value": ".ftpaccess" }}})
     must_not.append({"term": {"name.keyword": {"value": "00README_catalogue_and_licence.txt" }}})
