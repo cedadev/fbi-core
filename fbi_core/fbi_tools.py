@@ -57,7 +57,6 @@ def fbi_records_under(path, fetch_size=10000, exclude_phenomena=False, **kwargs)
     query["size"] = fetch_size
     while True:
         query["search_after"] = [search_after]
-        print(n, query)
         result = es.search(index=indexname, body=query, request_timeout=900)
         nfound = len(result["hits"]["hits"])
         n += nfound
