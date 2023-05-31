@@ -46,6 +46,29 @@ def fbi_records(after="/", stop="~", fetch_size=10000, exclude_phenomena=False, 
                 yield record["_source"]
 
 
+def fbi_records_under(path, fetch_size=10000, exclude_phenomena=False, **kwargs):
+    """FBI record iterator in path order"""
+    n = 0
+    search_after = ""
+    query = all_under_query(path, **kwargs)
+    if exclude_phenomena:
+            query["_source"] = {"exclude": ["phenomena"]}
+    query["sort"] = [{ "path.keyword": "asc" }]
+    query["size"] = fetch_size
+    while True:
+        query["search_after"] = [search_after]
+        print(n, query)
+        result = es.search(index=indexname, body=query, request_timeout=900)
+        nfound = len(result["hits"]["hits"])
+        n += nfound
+        if nfound == 0:
+            break
+        else:
+            search_after = result["hits"]["hits"][-1]["_source"]["path"]
+            for record in result["hits"]["hits"]:
+                yield record["_source"]
+
+
 def where_is(name, fetch_size=10000, removed=False):
     """retrun records for items named"""
     query = all_under_query("/", name_regex=name, include_removed=removed)
