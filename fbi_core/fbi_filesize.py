@@ -2,6 +2,7 @@ from typing import DefaultDict
 import click
 import json
 import tabulate
+import colorama
 from .format_utils import sizeof_fmt
 from .fbi_tools import es, indexname, get_record, archive_summary, ls_query, parameters, lastest_file, convert2datetime, get_random
 
@@ -64,16 +65,18 @@ def summary(paths, maxtypes, **kwargs):
     for path in paths:
         size_stats, item_types, exts = agg_info(path, maxtypes=maxtypes, **kwargs)
 
-        ext_str = ""
-        for ext, number in exts.items():
-            ext_str += f"{ext}:{number} " 
+        ext_str = ", ".join(map(lambda x: f"{x[0]}: {x[1]}" , exts.items()))
 
         table.append([path, item_types['file'], item_types['dir'],item_types['link'],
                       sizeof_fmt(size_stats["sum"]),
                       sizeof_fmt(size_stats["min"]), sizeof_fmt(size_stats["max"]), 
-                      sizeof_fmt(size_stats["avg"]), exts])
+                      sizeof_fmt(size_stats["avg"]), ext_str])
 
-    print(tabulate.tabulate(table, headers))
+    table_str = tabulate.tabulate(table, headers)
+    unit_highligths = (("PiB", colorama.Fore.RED), ("TiB", colorama.Fore.YELLOW))
+    for unit, colour in unit_highligths:
+        table_str = table_str.replace(unit, f"{colour}{unit}{colorama.Style.RESET_ALL}")
+    print(table_str)
 
 
 @click.command()

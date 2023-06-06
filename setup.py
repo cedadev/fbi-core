@@ -12,7 +12,7 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
 
 setup(
     name='fbi-core',
-    version='1.1.30',
+    version='1.1.31',
     description='File Based Index  (FBI) core tools',
     long_description=long_description,
 
@@ -23,7 +23,7 @@ setup(
     author_email='sam.pepler@stfc.ac.uk',
     # Choose your license
     license='BSD',
-    install_requires=['tabulate', 'click', 'pyyaml', 'elasticsearch'],
+    install_requires=['tabulate', 'click', 'pyyaml', 'elasticsearch', 'colorama'],
 
     # See https://pypi.python.org/pypi?%3Aaction=list_classifiers
     classifiers=[
