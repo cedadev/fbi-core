@@ -66,11 +66,11 @@ def summary(paths, maxtypes, **kwargs):
         size_stats, item_types, exts = agg_info(path, maxtypes=maxtypes, **kwargs)
 
         ext_str = ", ".join(map(lambda x: f"{x[0]}: {x[1]}" , exts.items()))
-
-        table.append([path, item_types['file'], item_types['dir'],item_types['link'],
-                      sizeof_fmt(size_stats["sum"]),
-                      sizeof_fmt(size_stats["min"]), sizeof_fmt(size_stats["max"]), 
-                      sizeof_fmt(size_stats["avg"]), ext_str])
+        if item_types['file'] + item_types['dir'] + item_types['link'] > 0:
+            table.append([path, item_types['file'], item_types['dir'],item_types['link'],
+                          sizeof_fmt(size_stats["sum"]),
+                          sizeof_fmt(size_stats["min"]), sizeof_fmt(size_stats["max"]), 
+                          sizeof_fmt(size_stats["avg"]), ext_str])
 
     table_str = tabulate.tabulate(table, headers)
     unit_highligths = (("PiB", colorama.Fore.RED), ("TiB", colorama.Fore.YELLOW))
