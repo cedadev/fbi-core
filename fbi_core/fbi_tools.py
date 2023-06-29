@@ -46,10 +46,10 @@ def fbi_records(after="/", stop="~", fetch_size=10000, exclude_phenomena=False, 
                 yield record["_source"]
 
 
-def fbi_records_under(path, fetch_size=10000, exclude_phenomena=False, **kwargs):
+def fbi_records_under(path, fetch_size=10000, exclude_phenomena=False, search_after ="", **kwargs):
     """FBI record iterator in path order"""
     n = 0
-    search_after = ""
+    search_after = search_after
     query = all_under_query(path, **kwargs)
     if exclude_phenomena:
             query["_source"] = {"exclude": ["phenomena"]}
@@ -112,6 +112,7 @@ def all_under_query(path, location=None, name_regex=None,
     if path == "/":
         must = [{"match_all": {}}]
     else:
+        path = path.rstrip("/")
         must = [{"term": {"directory.tree": {"value": path}}}]
 
     if include_removed:
