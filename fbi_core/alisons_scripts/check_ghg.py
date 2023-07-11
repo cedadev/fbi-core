@@ -1,6 +1,7 @@
 #Example to check ghg cci data 
 
-import lotus_md5sum, compare_md5files_quick
+import lotus_md5sum
+import compare_md5files_quick
 
 #1) check old ghg data in the archive against old files in the group workspace
 
