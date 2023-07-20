@@ -108,7 +108,7 @@ def all_under_query(path, location=None, name_regex=None,
                     include_removed=False, item_type=None, ext=None,
                     since=None, before=None, 
                     audited_since=None, audited_before=None, 
-                    corrupt_since=None, corrpt_before=None, 
+                    corrupt_since=None, corrupt_before=None, 
                     with_field=None, without=None, blank=None, 
                     maxsize=None, minsize=None):
     if path == "/":
@@ -163,8 +163,8 @@ def all_under_query(path, location=None, name_regex=None,
     if corrupt_since is not None:
         must.append({"range": {"corrupted": {"gte": corrupt_since}}})
 
-    if corrpt_before is not None:
-        must.append({"range": {"corrupted": {"lte": corrpt_before}}})
+    if corrupt_before is not None:
+        must.append({"range": {"corrupted": {"lte": corrupt_before}}})
 
 
     if location is not None:

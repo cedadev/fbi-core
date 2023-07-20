@@ -6,7 +6,7 @@ import colorama
 from .format_utils import sizeof_fmt
 from .fbi_tools import es, indexname, get_record, archive_summary, ls_query, parameters, lastest_file, convert2datetime, get_random
 
-
+CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 
 class FilterCommand(click.Command):
     """class to add standard options to command line tools"""
@@ -60,7 +60,7 @@ def agg_info(path, maxtypes=3, **kwargs):
     return info["size_stats"], item_types, exts
 
 
-@click.command(cls=FilterCommand)
+@click.command(cls=FilterCommand, context_settings=CONTEXT_SETTINGS)
 @click.argument("paths", nargs=-1)
 @click.option("--maxtypes", help="Max number of common types to display.", default=3)
 def summary(paths, maxtypes, **kwargs):
@@ -120,7 +120,7 @@ def show_last_updated(paths, filenames, record):
                 print(json.dumps(rec, indent=4))
 
 
-@click.command(cls=FilterCommand)
+@click.command(cls=FilterCommand, context_settings=CONTEXT_SETTINGS)
 @click.argument("path")
 @click.option("-n", "--number", metavar="N", help="Pick N paths. Max 10000", type=int, default=20)
 def random_paths(path, number, **kwargs):
