@@ -2,7 +2,7 @@ import threading
 from queue import Queue
 from elasticsearch import Elasticsearch
 import click
-from .fbi_tools import es, indexname, get_record, archive_summary, ls_query, parameters, lastest_file, convert2datetime, get_random, splits
+from .fbi_tools import es, indexname, fbi_records_under, splits
 
 
 # Output directory
@@ -11,63 +11,53 @@ output_dir = '/path/to/output/directory'
 
 
 # Worker function to extract records and dump them to files
-def worker():
+def worker(queue, ithread, es_retrive_size):
+    batch_num = 0
+    print(f"starting tread {ithread}")
     while True:
+        print("GET")
         batch = queue.get()
         if batch is None:
+            print(f"stop thread {ithread}")
             break
+        after, stop, size = batch
+        print(f"thread {ithread} pick up batch {batch}")
 
-        # Process the batch of records and dump them to a file
+        # Fetch records from Elasticsearch and add them to the queue 
+        for i, record in enumerate(fbi_records_under("/", search_after=after, search_stop=stop, fetch_size=es_retrive_size)):
+            print(ithread, batch_num, i, record["path"])
+
+        ''' # Process the batch of records and dump them to a file
         output_file = f"{output_dir}/{threading.current_thread().name}.txt"
         with open(output_file, 'w') as file:
             for record in batch:
-                file.write(f"{record}\n")
+                file.write(f"{record}\n")'''
 
-        queue.task_done()
+        #queue.task_done()
+        batch_num += 1
 
 @click.command()
 @click.option('--num-threads', default=4, help='Number of threads to use')
-@click.option('--batch-size', default=100, help='Number of records to fetch per batch')
-def main(num_threads, batch_size):
+@click.option('--es-batch-size', default=10000, help='Number of records to fetch per batch')
+@click.option('--records-per-file', default=10000, help='Number of records to fetch per batch')
+@click.option('--path', help='Root path to dump', default="/")
+def main(num_threads, es_batch_size, records_per_file, path):
 
-
-    split_batches = splits(batch_size=1000000)
+    split_batches = splits(batch_size=records_per_file, root_path=path)
     print(split_batches)
-    xxx
+
     # Create a queue to hold the batches of records
     queue = Queue()
 
     # Create and start worker threads
     threads = []
-    for _ in range(num_threads):
-        thread = threading.Thread(target=worker)
+    for ithread in range(num_threads):
+        thread = threading.Thread(target=worker, args=(queue, ithread, es_batch_size))
         thread.start()
         threads.append(thread)
 
-    # Fetch records from Elasticsearch and add them to the queue
-    scroll_id = None
-    while True:
-        response = es.search(
-            index=index_name,
-            doc_type=doc_type,
-            scroll='2m',
-            size=batch_size,
-            body={
-                'query': {'match_all': {}}
-            },
-            sort=['_doc'],
-            scroll_id=scroll_id
-        )
-
-        records = [hit['_source'] for hit in response['hits']['hits']]
-        queue.put(records)
-
-        scroll_id = response['_scroll_id']
-        if len(records) < batch_size:
-            break
-
-    # Wait for all tasks to be processed
-    queue.join()
+    for batch in split_batches:
+        queue.put(batch)
 
     # Stop worker threads
     for _ in range(num_threads):

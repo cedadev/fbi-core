@@ -46,20 +46,23 @@ def fbi_records(after="/", stop="~", fetch_size=10000, exclude_phenomena=False, 
                 yield record["_source"]
 
 
-def fbi_records_under(path, fetch_size=10000, exclude_phenomena=False, search_after ="", **kwargs):
+def fbi_records_under(path, fetch_size=10000, exclude_phenomena=False, search_after="", search_stop="~", **kwargs):
     """FBI record iterator in path order"""
     n = 0
     search_after = search_after
+    path = os.path.commonpath((search_after, search_stop))
     query = all_under_query(path, **kwargs)
     if exclude_phenomena:
             query["_source"] = {"exclude": ["phenomena"]}
     query["sort"] = [{ "path.keyword": "asc" }]
     query["size"] = fetch_size
+    query["query"]["bool"]["must"].append({"range": {"path.keyword": {"lte": search_stop}}})
     while True:
         query["search_after"] = [search_after]
         result = es.search(index=indexname, body=query, request_timeout=900)
         nfound = len(result["hits"]["hits"])
         n += nfound
+        print(f"{nfound} xxx {query}")
         if nfound == 0:
             break
         else:
@@ -265,8 +268,8 @@ def split(splitlist, batch_size):
         new_splits.append((directory, count))
     return new_splits
 
-def splits(batch_size=10000000):
-    splits = [("/", fbi_count_in_dir2("/"))]
+def splits(batch_size=10000000, root_path="/"):
+    splits = [(root_path, fbi_count_in_dir2(root_path))]
     while True:
         new_splits = split(splits, batch_size=batch_size)
         if len(splits) == len(new_splits):
@@ -276,14 +279,14 @@ def splits(batch_size=10000000):
     splits.sort()
     merged = []
     count = 0
-    after = "/"
+    after = root_path
     for d, c in splits:
         if count + c > batch_size:
             merged.append((after, d, count))
             after = d
             count = 0
         count += c
-    merged.append((after, "~", count))
+    merged.append((after, root_path+"~", count))
 
     for d, s, c in merged:
         print(d, s, c)

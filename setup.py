@@ -48,6 +48,7 @@ setup(
             'fbi_parameters=fbi_core.fbi_filesize:show_parameters',
             'fbi_last_updated=fbi_core.fbi_filesize:show_last_updated',
             'fbi_split=fbi_core.fbi_tools:splits',
+            'fbi_dump=fbi_core.fbi_dump:main',
         ],
     },
 )
