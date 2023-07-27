@@ -1,10 +1,12 @@
 from typing import DefaultDict
 import click
 import json
+import sys
+import os
 import tabulate
 import colorama
 from .format_utils import sizeof_fmt
-from .fbi_tools import es, indexname, get_record, archive_summary, ls_query, parameters, lastest_file, convert2datetime, get_random
+from .fbi_tools import es, indexname, get_record, archive_summary, ls_query, parameters, lastest_file, convert2datetime, get_random,  fbi_records_under, get_records_by_content
 
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 
@@ -44,6 +46,52 @@ def ls(paths, **kwargs):
         for f in files:
             print(f["path"])
 
+@click.command(cls=FilterCommand)
+@click.argument("paths", nargs=-1)
+def md5sum(paths, **kwargs):
+    """Make a list of MD5 checksums from FBI"""
+    for path in paths:
+        files = fbi_records_under(path, **kwargs)
+        for f in files:
+            if "md5" in f:
+                print(f'{f["md5"]} {f["path"]}')
+
+
+@click.command()
+@click.option("-l", '--filelist', help='file listing. Defaults to sdtin', type=click.File('r'), default=sys.stdin)
+@click.option("--limit-path", help="Limit the search to files under this path")
+@click.option("-r", "--include-removed", help="Include files that have been removed from the archive.", is_flag=True)
+@click.option("-m", "--match-filename", help="Only match if the filename in the archive is the same.", is_flag=True)
+@click.option("-v", "--verbose", help="Print each line", is_flag=True)
+def check_archive_by_checksum(filelist, limit_path, include_removed, match_filename, verbose):
+    """Check files in archive against md5sum output."""
+    matched = 0
+    unmatched = 0
+    duplicates = []
+    for line in filelist:
+        md5, path = line.strip().split()
+        if match_filename:
+            filename = os.path.basename(path)
+        else:
+            filename = None
+        records = get_records_by_content(md5, include_removed=include_removed, under=limit_path, filename=filename)
+        n_records = len(records)
+        if n_records == 1:
+            matched += 1
+            if verbose: print(f"SINGLE MATCH {md5}  {path} == {records[0]['path']}")
+        elif n_records == 0:
+            unmatched += 1
+            if verbose: print(f"NO MATCH     {md5} {path}")
+        else:
+            duplicates.append(path)
+            if verbose: 
+                print(f"DUPLICATES   {n_records} * {md5} {path}") 
+                for record in records: print(record["path"])
+     
+
+    print(f"Found single matching file:     {matched}")
+    print(f"Not found:                      {unmatched}")
+    print(f"Duplicate files:                {len(duplicates)}")
 
 def agg_info(path, maxtypes=3, **kwargs):
     info = archive_summary(path, max_types=maxtypes, max_exts=maxtypes, **kwargs)
@@ -66,6 +114,10 @@ def agg_info(path, maxtypes=3, **kwargs):
 def summary(paths, maxtypes, **kwargs):
     table = []
     headers = ["Path", "Files", "Dirs", "links", "Size", "Min", "Max", "Avg", "exts"]
+    total_files = 0
+    total_dirs = 0
+    total_links = 0
+    total_size = 0
     for path in paths:
         size_stats, item_types, exts = agg_info(path, maxtypes=maxtypes, **kwargs)
 
@@ -75,7 +127,12 @@ def summary(paths, maxtypes, **kwargs):
                           sizeof_fmt(size_stats["sum"]),
                           sizeof_fmt(size_stats["min"]), sizeof_fmt(size_stats["max"]), 
                           sizeof_fmt(size_stats["avg"]), ext_str])
-
+        total_files += item_types['file']
+        total_dirs += item_types['dir']
+        total_links += item_types['link']
+        total_size += size_stats["sum"]
+    table.append(["TOTALS", total_files, total_dirs, total_links, sizeof_fmt(total_size),
+                          "", "", "", ""])
     table_str = tabulate.tabulate(table, headers)
     unit_highligths = (("PiB", colorama.Fore.RED), ("TiB", colorama.Fore.YELLOW))
     for unit, colour in unit_highligths:

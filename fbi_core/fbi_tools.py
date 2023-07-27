@@ -389,6 +389,37 @@ def get_record(path):
         return None
     return dict(record)    
 
+def get_record_attr(path, attr):
+    """return a single attribute value from the record of a path"""
+    rec = get_record(path)
+    return rec.get(attr)
+
+def get_records_by_content(md5, filename=None, under=None, include_removed=False):
+    """Get records with content that matches an md5. 
+    Optionaly make it match a filename and a parent directory."""
+    if under == "/" or under is None:
+        must = [{"match_all": {}}]
+    else:
+        under = under.rstrip("/")
+        must = [{"term": {"directory.tree": {"value": under}}}]
+
+    must.append({"term": {"md5": {"value": md5}}})
+
+    if include_removed:
+        must_not = []
+    else:
+        must_not = [{"exists": {"field": "removed"}}]
+    
+    if filename is not None:
+        must.append({"term": {"name.keyword": { "value": filename}}})
+
+    query = {"query": {"bool": {"must": must, "must_not": must_not}}}
+    results = es.search(index=indexname, body=query, request_timeout=90)
+    records = []
+    for r in results["hits"]["hits"]:
+        records.append(r["_source"])
+    return records
+
 def _create_id(path):
     return hashlib.sha1(path.encode()).hexdigest()
 
