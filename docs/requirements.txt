@@ -1,3 +1,2 @@
 furo
-git+ssh://git@github.com/cedadev/fbi-core.git
 git+ssh://git@github.com/cedadev/ceda-elasticsearch-client.git
