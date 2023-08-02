@@ -7,9 +7,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     # Checkout and build the docs with sphinx
-    - name: install git
-      run: sudo apt-get -y install git
+ 
     - uses: actions/checkout@v2
+    - name: install git
+      run: |
+        sudo apt-get -y install git
     - name: Build HTML
       uses: ammaraskar/sphinx-action@master
       with: 
