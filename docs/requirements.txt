@@ -1,2 +1,2 @@
 furo
-git+ssh://git@github.com/cedadev/ceda-elasticsearch-client.git
+ceda-elasticsearch-client

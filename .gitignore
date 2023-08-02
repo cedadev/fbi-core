@@ -4,3 +4,4 @@ venv
 a
 build
 *.egg-info
+dist
