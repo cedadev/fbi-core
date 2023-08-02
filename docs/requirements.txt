@@ -1,1 +1,2 @@
 furo
+git+ssh://git@github.com/cedadev/fbi-core.git
