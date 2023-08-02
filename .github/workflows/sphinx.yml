@@ -18,7 +18,7 @@ jobs:
       uses: ammaraskar/sphinx-action@master
       with: 
         docs-folder: "docs/"
-        # pre-build-command: "mkdir /tmp/sphinx-log"
+        pre-build-command: "sudo apt-get -y install git"
     - name: Upload artifacts
       uses: actions/upload-artifact@v1
       with:
