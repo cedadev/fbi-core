@@ -11,6 +11,7 @@ Welcome to fbi-core's documentation!
    :caption: Contents:
    
    usage
+   api
 
 
 
