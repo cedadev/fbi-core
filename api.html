@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>fbi_core module &#8212; fbi-core 0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b76e3c8a" />
+    <link rel="stylesheet" type="text/css" href="_static/classic.css?v=89b800e6" />
+    
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js?v=e031e9a9"></script>
+    <script src="_static/doctools.js?v=888ff710"></script>
+    <script src="_static/sphinx_highlight.js?v=4825356b"></script>
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Usage" href="usage.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="usage.html" title="Usage"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">fbi-core 0.1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">fbi_core module</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="module-fbi_core">
+<span id="fbi-core-module"></span><h1>fbi_core module<a class="headerlink" href="#module-fbi_core" title="Permalink to this heading">¶</a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="fbi_core.all_under_query">
+<span class="sig-prename descclassname"><span class="pre">fbi_core.</span></span><span class="sig-name descname"><span class="pre">all_under_query</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">location</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name_regex</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_removed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">item_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ext</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">since</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">before</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">audited_since</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">audited_before</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">corrupt_since</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">corrupt_before</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">with_field</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">without</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">blank</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fbi_core.all_under_query" title="Permalink to this definition">¶</a></dt>
+<dd><p>Make elastic search query for FBI records.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<em>str</em>) – The path to search under.</p></li>
+<li><p><strong>path</strong> – Media location, either on_disk or on_tape</p></li>
+<li><p><strong>name_regex</strong> (<em>str</em>) – A regular expression to match against the file or directory name.</p></li>
+<li><p><strong>include_removed</strong> (<em>bool</em>) – Flag to include removed items in the search.</p></li>
+<li><p><strong>item_type</strong> (<em>str</em>) – Item type for the record. Either “file”, “dir” or “link”.</p></li>
+<li><p><strong>ext</strong> (<em>str</em>) – Search on extention type. e.g. “.nc”.</p></li>
+<li><p><strong>since</strong> (<em>str</em>) – Search for items modified since this iso formated datetime.</p></li>
+<li><p><strong>before</strong> (<em>str</em>) – Search for items modified before this iso formated datetime.</p></li>
+<li><p><strong>audited_since</strong> (<em>str</em>) – Search for items audited since this iso formated datetime.</p></li>
+<li><p><strong>audited_before</strong> (<em>str</em>) – Search for items audited before this iso formated datetime.</p></li>
+<li><p><strong>corrupt_since</strong> (<em>str</em>) – Search for items corrupt since this iso formated datetime.</p></li>
+<li><p><strong>corrupt_before</strong> (<em>str</em>) – Search for items corrupt before this iso formated datetime.</p></li>
+<li><p><strong>with_field</strong> (<em>str</em>) – Search for items where this field exists.</p></li>
+<li><p><strong>without</strong> (<em>str</em>) – Search for items where this field does not exist.</p></li>
+<li><p><strong>blank</strong> (<em>str</em>) – Search for items where this field is an empty string.</p></li>
+<li><p><strong>maxsize</strong> (<em>int</em>) – Search for items smaller than this size in bytes.</p></li>
+<li><p><strong>maxsize</strong> – Search for items larger than this size in bytes.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return dict<span class="colon">:</span></dt>
+<dd class="field-even"><p>Elasticsearch query which could be used by the elacticsearch client.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fbi_core.archive_summary">
+<span class="sig-prename descclassname"><span class="pre">fbi_core.</span></span><span class="sig-name descname"><span class="pre">archive_summary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_types</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_vars</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_exts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_removed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fbi_core.archive_summary" title="Permalink to this definition">¶</a></dt>
+<dd><p>find summary info for the archive below a path.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fbi_core.bulk_update">
+<span class="sig-prename descclassname"><span class="pre">fbi_core.</span></span><span class="sig-name descname"><span class="pre">bulk_update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">records</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fbi_core.bulk_update" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update a list of records</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fbi_core.fbi_count">
+<span class="sig-prename descclassname"><span class="pre">fbi_core.</span></span><span class="sig-name descname"><span class="pre">fbi_count</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">after</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'~'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">item_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fbi_core.fbi_count" title="Permalink to this definition">¶</a></dt>
+<dd><p>FBI record counter</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fbi_core.fbi_count_in_dir2">
+<span class="sig-prename descclassname"><span class="pre">fbi_core.</span></span><span class="sig-name descname"><span class="pre">fbi_count_in_dir2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">directory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">item_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fbi_core.fbi_count_in_dir2" title="Permalink to this definition">¶</a></dt>
+<dd><p>FBI record counter</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fbi_core.fbi_listdir">
+<span class="sig-prename descclassname"><span class="pre">fbi_core.</span></span><span class="sig-name descname"><span class="pre">fbi_listdir</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">directory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fetch_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dirs_only</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">removed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hidden</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fbi_core.fbi_listdir" title="Permalink to this definition">¶</a></dt>
+<dd><p>FBI record iterator for a directory</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fbi_core.fbi_records">
+<span class="sig-prename descclassname"><span class="pre">fbi_core.</span></span><span class="sig-name descname"><span class="pre">fbi_records</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">after</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'~'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fetch_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude_phenomena</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">item_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fbi_core.fbi_records" title="Permalink to this definition">¶</a></dt>
+<dd><p>FBI record iterator in path order.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>after</strong> (<em>str</em>) – paths after are iterated over. Defaults to “/”</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fbi_core.fbi_records_under">
+<span class="sig-prename descclassname"><span class="pre">fbi_core.</span></span><span class="sig-name descname"><span class="pre">fbi_records_under</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fetch_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude_phenomena</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">search_after</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fbi_core.fbi_records_under" title="Permalink to this definition">¶</a></dt>
+<dd><p>FBI record iterator in path order</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fbi_core.get_records_by_content">
+<span class="sig-prename descclassname"><span class="pre">fbi_core.</span></span><span class="sig-name descname"><span class="pre">get_records_by_content</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">md5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">under</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_removed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fbi_core.get_records_by_content" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get records with content that matches an md5. 
+Optionaly make it match a filename and a parent directory.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fbi_core.insert_item">
+<span class="sig-prename descclassname"><span class="pre">fbi_core.</span></span><span class="sig-name descname"><span class="pre">insert_item</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">record</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fbi_core.insert_item" title="Permalink to this definition">¶</a></dt>
+<dd><p>Insert record by replaceing it</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fbi_core.lastest_file">
+<span class="sig-prename descclassname"><span class="pre">fbi_core.</span></span><span class="sig-name descname"><span class="pre">lastest_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">directory</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fbi_core.lastest_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>latest file record of last updated file under a path.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>directory</strong> (<em>str</em>) – path to search for last updated file</p>
+</dd>
+<dt class="field-even">Return dict or None<span class="colon">:</span></dt>
+<dd class="field-even"><p>Record for the last updated file.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fbi_core.ls_query">
+<span class="sig-prename descclassname"><span class="pre">fbi_core.</span></span><span class="sig-name descname"><span class="pre">ls_query</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_removed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10000</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fbi_core.ls_query" title="Permalink to this definition">¶</a></dt>
+<dd><p>ls for fbi</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<em>str</em>) – </p></li>
+<li><p><strong>**kwrargs</strong> – <p>Any options from all_under_query</p>
+</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return list[dict]<span class="colon">:</span></dt>
+<dd class="field-even"><p>FBI records.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fbi_core.nla_dirs">
+<span class="sig-prename descclassname"><span class="pre">fbi_core.</span></span><span class="sig-name descname"><span class="pre">nla_dirs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">after</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/~'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fetch_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10000</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fbi_core.nla_dirs" title="Permalink to this definition">¶</a></dt>
+<dd><p>FBI record iterator for nla directories</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fbi_core.update_item">
+<span class="sig-prename descclassname"><span class="pre">fbi_core.</span></span><span class="sig-name descname"><span class="pre">update_item</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">record</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fbi_core.update_item" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update a single document - overwrite feilds in record suplied.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fbi_core.where_is">
+<span class="sig-prename descclassname"><span class="pre">fbi_core.</span></span><span class="sig-name descname"><span class="pre">where_is</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fetch_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">removed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fbi_core.where_is" title="Permalink to this definition">¶</a></dt>
+<dd><p>retrun records for items named</p>
+</dd></dl>
+
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="index.html">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">fbi_core module</a><ul>
+<li><a class="reference internal" href="#fbi_core.all_under_query"><code class="docutils literal notranslate"><span class="pre">all_under_query()</span></code></a></li>
+<li><a class="reference internal" href="#fbi_core.archive_summary"><code class="docutils literal notranslate"><span class="pre">archive_summary()</span></code></a></li>
+<li><a class="reference internal" href="#fbi_core.bulk_update"><code class="docutils literal notranslate"><span class="pre">bulk_update()</span></code></a></li>
+<li><a class="reference internal" href="#fbi_core.fbi_count"><code class="docutils literal notranslate"><span class="pre">fbi_count()</span></code></a></li>
+<li><a class="reference internal" href="#fbi_core.fbi_count_in_dir2"><code class="docutils literal notranslate"><span class="pre">fbi_count_in_dir2()</span></code></a></li>
+<li><a class="reference internal" href="#fbi_core.fbi_listdir"><code class="docutils literal notranslate"><span class="pre">fbi_listdir()</span></code></a></li>
+<li><a class="reference internal" href="#fbi_core.fbi_records"><code class="docutils literal notranslate"><span class="pre">fbi_records()</span></code></a></li>
+<li><a class="reference internal" href="#fbi_core.fbi_records_under"><code class="docutils literal notranslate"><span class="pre">fbi_records_under()</span></code></a></li>
+<li><a class="reference internal" href="#fbi_core.get_records_by_content"><code class="docutils literal notranslate"><span class="pre">get_records_by_content()</span></code></a></li>
+<li><a class="reference internal" href="#fbi_core.insert_item"><code class="docutils literal notranslate"><span class="pre">insert_item()</span></code></a></li>
+<li><a class="reference internal" href="#fbi_core.lastest_file"><code class="docutils literal notranslate"><span class="pre">lastest_file()</span></code></a></li>
+<li><a class="reference internal" href="#fbi_core.ls_query"><code class="docutils literal notranslate"><span class="pre">ls_query()</span></code></a></li>
+<li><a class="reference internal" href="#fbi_core.nla_dirs"><code class="docutils literal notranslate"><span class="pre">nla_dirs()</span></code></a></li>
+<li><a class="reference internal" href="#fbi_core.update_item"><code class="docutils literal notranslate"><span class="pre">update_item()</span></code></a></li>
+<li><a class="reference internal" href="#fbi_core.where_is"><code class="docutils literal notranslate"><span class="pre">where_is()</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="usage.html"
+                          title="previous chapter">Usage</a></p>
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/api.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="usage.html" title="Usage"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">fbi-core 0.1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">fbi_core module</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2023, Sam Pepler.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.1.2.
+    </div>
+  </body>
+</html>
