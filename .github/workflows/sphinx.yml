@@ -12,6 +12,8 @@ jobs:
     - name: install git
       run: |
         sudo apt-get -y install git
+        PATH=$PATH:/usr/bin
+        git --version
     - name: Build HTML
       uses: ammaraskar/sphinx-action@master
       with: 
