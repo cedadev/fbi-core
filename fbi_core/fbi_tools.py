@@ -17,7 +17,10 @@ else:
 indexname = "fbi-2022"
 
 def fbi_records(after="/", stop="~", fetch_size=10000, exclude_phenomena=False, item_type=None):
-    """FBI record iterator in path order"""
+    """FBI record iterator in path order. 
+    
+    :param str after: paths after are iterated over. Defaults to "/"
+    """
     n = 0
     current_stop = stop
     while True:
@@ -83,7 +86,12 @@ def where_is(name, fetch_size=10000, removed=False):
 
 
 def ls_query(path, include_removed=False, size=10000, **kwargs):
-    """ls for fbi"""
+    """ls for fbi
+    
+    :param str path:
+    :param **kwrargs: Any options from all_under_query
+    :return list[dict]: FBI records.
+    """
     query = all_under_query(path, include_removed=include_removed, **kwargs)
     
     query["size"] = size
@@ -114,6 +122,28 @@ def all_under_query(path, location=None, name_regex=None,
                     corrupt_since=None, corrupt_before=None, 
                     with_field=None, without=None, blank=None, 
                     maxsize=None, minsize=None):
+    """
+    Make elastic search query for FBI records. 
+
+    :param str path: The path to search under.
+    :param str path: Media location, either on_disk or on_tape
+    :param str name_regex: A regular expression to match against the file or directory name.
+    :param bool include_removed: Flag to include removed items in the search.
+    :param str item_type: Item type for the record. Either "file", "dir" or "link".
+    :param str ext: Search on extention type. e.g. ".nc".
+    :param str since: Search for items modified since this iso formated datetime. 
+    :param str before: Search for items modified before this iso formated datetime. 
+    :param str audited_since: Search for items audited since this iso formated datetime. 
+    :param str audited_before: Search for items audited before this iso formated datetime. 
+    :param str corrupt_since: Search for items corrupt since this iso formated datetime. 
+    :param str corrupt_before: Search for items corrupt before this iso formated datetime. 
+    :param str with_field: Search for items where this field exists.
+    :param str without: Search for items where this field does not exist.
+    :param str blank: Search for items where this field is an empty string.
+    :param int maxsize: Search for items smaller than this size in bytes.
+    :param int maxsize: Search for items larger than this size in bytes.
+    :return dict: Elasticsearch query which could be used by the elacticsearch client. 
+    """
     if path == "/":
         must = [{"match_all": {}}]
     else:
@@ -176,7 +206,11 @@ def all_under_query(path, location=None, name_regex=None,
     return {"query": {"bool": {"must": must, "must_not": must_not }}}    
 
 def lastest_file(directory):
-    """latest file record of last updated file under a path"""
+    """latest file record of last updated file under a path.
+    
+    :param str directory: path to search for last updated file
+    :return dict or None: Record for the last updated file.
+    """
     query = all_under_query(directory, item_type="file")
     query["sort"] = [{"last_modified": {"order": "desc"}}]
     query["size"] = 1
