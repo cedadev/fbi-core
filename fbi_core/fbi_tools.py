@@ -109,9 +109,11 @@ def fbi_count_in_dir(directory, item_type=None):
 
 def all_under_query(path, location=None, name_regex=None, 
                     include_removed=False, item_type=None, ext=None,
-                    since=None, before=None, with_field=None, without=None, blank=None, 
-                    maxsize=None, minsize=None,
-                    audited_before=None):
+                    since=None, before=None, 
+                    audited_since=None, audited_before=None, 
+                    corrupt_since=None, corrupt_before=None, 
+                    with_field=None, without=None, blank=None, 
+                    maxsize=None, minsize=None):
     if path == "/":
         must = [{"match_all": {}}]
     else:
@@ -155,8 +157,18 @@ def all_under_query(path, location=None, name_regex=None,
     if before is not None:
         must.append({"range": {"last_modified": {"lte": before}}})
 
+    if audited_since is not None:
+        must.append({"range": {"last_audit": {"gte": audited_since}}})
+
     if audited_before is not None:
         must.append({"range": {"last_audit": {"lte": audited_before}}})
+
+    if corrupt_since is not None:
+        must.append({"range": {"corrupted": {"gte": corrupt_since}}})
+
+    if corrupt_before is not None:
+        must.append({"range": {"corrupted": {"lte": corrupt_before}}})
+
 
     if location is not None:
         must.append({"term": {"location": location}})
@@ -379,6 +391,37 @@ def get_record(path):
     except elasticsearch.exceptions.NotFoundError:
         return None
     return dict(record)    
+
+def get_record_attr(path, attr):
+    """return a single attribute value from the record of a path"""
+    rec = get_record(path)
+    return rec.get(attr)
+
+def get_records_by_content(md5, filename=None, under=None, include_removed=False):
+    """Get records with content that matches an md5. 
+    Optionaly make it match a filename and a parent directory."""
+    if under == "/" or under is None:
+        must = [{"match_all": {}}]
+    else:
+        under = under.rstrip("/")
+        must = [{"term": {"directory.tree": {"value": under}}}]
+
+    must.append({"term": {"md5": {"value": md5}}})
+
+    if include_removed:
+        must_not = []
+    else:
+        must_not = [{"exists": {"field": "removed"}}]
+    
+    if filename is not None:
+        must.append({"term": {"name.keyword": { "value": filename}}})
+
+    query = {"query": {"bool": {"must": must, "must_not": must_not}}}
+    results = es.search(index=indexname, body=query, request_timeout=90)
+    records = []
+    for r in results["hits"]["hits"]:
+        records.append(r["_source"])
+    return records
 
 def _create_id(path):
     return hashlib.sha1(path.encode()).hexdigest()
