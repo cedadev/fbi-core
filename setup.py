@@ -12,7 +12,7 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
 
 setup(
     name='fbi-core',
-    version='1.1.41',
+    version='1.1.42',
     description='File Based Index  (FBI) core tools',
     long_description=long_description,
 
@@ -47,7 +47,8 @@ setup(
             'fbi_show_record=fbi_core.fbi_filesize:show_record',
             'fbi_parameters=fbi_core.fbi_filesize:show_parameters',
             'fbi_last_updated=fbi_core.fbi_filesize:show_last_updated',
-            'fbi_split=fbi_core.fbi_tools:splits',
+            'fbi_split=fbi_core.fbi_filesize:find_splits',
+            'fbi_rsplit=fbi_core.fbi_filesize:find_rsplits',
             'fbi_md5sum=fbi_core.fbi_filesize:md5sum',
             'fbi_md5sum_check=fbi_core.fbi_filesize:check_archive_by_checksum',
             'fbi_dump=fbi_core.fbi_dump:main',

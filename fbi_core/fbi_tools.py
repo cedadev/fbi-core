@@ -49,35 +49,28 @@ def fbi_records(after="/", stop="~", fetch_size=10000, exclude_phenomena=False, 
                 yield record["_source"]
 
 
-def fbi_records_under(path, fetch_size=10000, exclude_phenomena=False, search_after="", search_stop="~", **kwargs):
+def fbi_records_under(path, fetch_size=10000, exclude_phenomena=False, search_after="/", search_stop="/~", **kwargs):
     """FBI record iterator in path order"""
     n = 0
     search_after = search_after
     path = os.path.commonpath((search_after, search_stop))
     query = all_under_query(path, **kwargs)
     if exclude_phenomena:
-            query["_source"] = {"exclude": ["phenomena"]}
+        query["_source"] = {"exclude": ["phenomena"]}
     query["sort"] = [{ "path.keyword": "asc" }]
     query["size"] = fetch_size
-    query["query"]["bool"]["must"].append({"range": {"path.keyword": {"lte": search_stop}}})
-    while True:
-        query["search_after"] = [search_after]
-        result = es.search(index=indexname, body=query, request_timeout=900)
-        nfound = len(result["hits"]["hits"])
-        n += nfound
-        print(f"{nfound} xxx {query}")
-        if nfound == 0:
-            break
-        else:
-            search_after = result["hits"]["hits"][-1]["_source"]["path"]
-            for record in result["hits"]["hits"]:
-                yield record["_source"]
+    query["query"]["bool"]["must"].append({"range": {"path.keyword": {"gt": search_after, "lte": search_stop}}})
+
+    for i, record in enumerate(scan(es, index=indexname, size=fetch_size, query=query, request_timeout=900)):
+        if i % 1000 == 0:
+            print(i, record["_source"]["path"])
+        yield record["_source"]
 
 
 def where_is(name, fetch_size=10000, removed=False):
     """retrun records for items named"""
     query = all_under_query("/", name_regex=name, include_removed=removed)
-    query["size"] = 10000
+    query["size"] = fetch_size
     results = es.search(index=indexname, body=query)
     files = []
     for r in results["hits"]["hits"]:
@@ -114,6 +107,16 @@ def fbi_count(after="/", stop="~", item_type=None):
 @lru_cache(maxsize=1024)
 def fbi_count_in_dir(directory, item_type=None):
     return fbi_count(after=directory, stop=directory + "/~", item_type=item_type)
+
+def count(path, after=None, stop=None, **kwargs):
+    query = all_under_query("/", **kwargs)
+    if after and stop:
+        query["query"]["bool"]["must"].append({"range": {"path.keyword": {"gt": after, "lte": stop}}})
+    elif after:
+        query["query"]["bool"]["must"].append({"range": {"path.keyword": {"gt": after}}})
+    elif stop:
+        query["query"]["bool"]["must"].append({"range": {"path.keyword": {"lte": stop}}})
+    return es.count(index=indexname, body=query, request_timeout=900)["count"]
 
 def all_under_query(path, location=None, name_regex=None, 
                     include_removed=False, item_type=None, ext=None,
@@ -253,6 +256,7 @@ def get_random_records(path, number, **kwargs):
     recs = []
     for r in results["hits"]["hits"]:
         recs.append(r["_source"])
+    recs.sort(key=lambda x: x["path"])
     return recs
 
 def get_random(path, number, **kwargs): 
@@ -313,6 +317,18 @@ def split(splitlist, batch_size):
                 count -= sub_count
         new_splits.append((directory, count))
     return new_splits
+
+def random_splits(path, nbatchs=20, **kwargs):
+    paths = get_random(path, nbatchs, **kwargs)
+    paths.append("/~~")
+    paths.insert(0, "/")
+    splits = []
+    for i, path in enumerate(paths[:-1]):
+        c = count(path, after=path, stop=paths[i+1], **kwargs)
+        print(c, path)
+        splits.append((path, paths[i+1], c))
+
+    return splits
 
 def splits(batch_size=10000000, root_path="/"):
     splits = [(root_path, fbi_count_in_dir2(root_path))]
