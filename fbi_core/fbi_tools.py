@@ -17,9 +17,16 @@ else:
 indexname = "fbi-2022"
 
 def fbi_records(after="/", stop="~", fetch_size=10000, exclude_phenomena=False, item_type=None):
-    """FBI record iterator in path order. 
+    """
+    FBI record iterator. The is implicitly in path order. 
     
-    :param str after: paths after are iterated over. Defaults to "/"
+    :param str after: paths after this are iterated over. Defaults to "/"
+    :param str stop: iteration stops when the path is greater than or equal to this. Defaults to "~" 
+    :param int fetch_size: The number of records to request from elasticsearch at a time.
+    :param bool exclude_phenomena: remove the bulky phenomena attribute from the record. Default is False.
+    :param str item_type: Item type for the records. Either "file", "dir" or "link". Defaults to all types.
+
+    :return iterator[dict]: Yeilds FBI records as dictionaries. 
     """
     n = 0
     current_stop = stop
@@ -136,7 +143,7 @@ def all_under_query(path="/", location=None, name_regex=None,
     Make elastic search query for FBI records. 
 
     :param str path: The path to search under.
-    :param str path: Media location, either on_disk or on_tape
+    :param str location: Media location, either on_disk or on_tape. Default is all locations.
     :param str name_regex: A regular expression to match against the file or directory name.
     :param bool include_removed: Flag to include removed items in the search.
     :param str item_type: Item type for the record. Either "file", "dir" or "link".
@@ -151,7 +158,8 @@ def all_under_query(path="/", location=None, name_regex=None,
     :param str without: Search for items where this field does not exist.
     :param str blank: Search for items where this field is an empty string.
     :param int maxsize: Search for items smaller than this size in bytes.
-    :param int maxsize: Search for items larger than this size in bytes.
+    :param int minsize: Search for items larger than this size in bytes.
+    
     :return dict: Elasticsearch query which could be used by the elacticsearch client. 
     """
     if path == "/":
@@ -294,9 +302,23 @@ def next_dir(directory):
         if subdir > directory: 
             return subdir
     return next_dir(parent)         
+def count_from(directory, from_dir):
+    count = 0
+    for record in fbi_listdir(directory, dirs_only=True): 
+        subdir = record["path"]     
+        if subdir > from_dir:
+            continue
+        count += fbi_count_in_dir2(subdir)
+    return count      
 
 
-def split(splitlist, batch_size):
+def _split(splitlist, batch_size):
+    """
+    Divide a list of directories into by adding subdirectories if there are too many items in a directory.
+
+    :param list splitlist: A list of tuples containing a directory name and an item count. 
+                           e.g. [("/x/y", 100)] may expand to [("/x/y/a", 50), ("/x/y/b", 10), ("/x/y/c", 40),]
+    """
     new_splits = []
     for directory, count in splitlist:
         if count > batch_size:
@@ -309,12 +331,10 @@ def split(splitlist, batch_size):
         new_splits.append((directory, count))
     return new_splits
 
-
-def splits(batch_size=10000000, root_path="/"):
-    splits = [(root_path, fbi_count_in_dir2(root_path))]
+def splits(batch_size=10000000):
+    splits = [("/", fbi_count_in_dir2("/"))]
     while True:
         new_splits = split(splits, batch_size=batch_size)
-        print("DIFF", set(new_splits)-set(splits))
         if len(splits) == len(new_splits):
             break
         splits = new_splits
@@ -336,6 +356,11 @@ def splits(batch_size=10000000, root_path="/"):
     return merged
 
 def make_dirs(directory):
+    """
+    Make FBI records for a diretory and any missing parent directories.
+
+    :param str directory: The directory to add. 
+    """
     while True:
         try:
             fbi_rec = get_record(directory)
