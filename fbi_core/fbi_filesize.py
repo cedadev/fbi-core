@@ -6,7 +6,7 @@ import os
 import tabulate
 import colorama
 from .format_utils import sizeof_fmt
-from .fbi_tools import es, indexname, get_record, archive_summary, ls_query, parameters, lastest_file, convert2datetime, get_random,  fbi_records_under, get_records_by_content, random_splits, splits
+from .fbi_tools import es, indexname, get_record, archive_summary, ls_query, parameters, lastest_file, convert2datetime, get_random,  fbi_records_under, get_records_by_content, splits
 
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 
@@ -190,20 +190,10 @@ def random_paths(path, number, **kwargs):
 
 @click.command(cls=FilterCommand, context_settings=CONTEXT_SETTINGS)
 @click.argument("path")
-@click.option("-n", "--number", metavar="N", help="Pick N paths. Max 10000", type=int, default=20)
-def find_rsplits(path, number, **kwargs): 
-
-    splits = random_splits(path, nbatchs=number, **kwargs)
-    for start, stop, count in splits:
-        print(f"{start}, {os.path.commonpath((start,stop))}, {count}")
-
-
-@click.command(cls=FilterCommand, context_settings=CONTEXT_SETTINGS)
-@click.argument("path")
 @click.option("-n", "--number", metavar="N", help="Pick N paths. Max 10000", type=int, default=10000000)
 def find_splits(path, number, **kwargs):
-    print("ff", number, kwargs)
-    sss = splits(path, batch_size=number, **kwargs)
+    print("ff", number)
+    sss = splits(root_path=path, batch_size=number)
     for start, stop, count in sss:
         print(f"{start}, {stop}, {count}")
 

@@ -49,7 +49,7 @@ def fbi_records(after="/", stop="~", fetch_size=10000, exclude_phenomena=False, 
                 yield record["_source"]
 
 
-def fbi_records_under(path, fetch_size=10000, exclude_phenomena=False, search_after="/", search_stop="/~", **kwargs):
+def fbi_records_under(path="/", fetch_size=10000, exclude_phenomena=False, search_after="/", search_stop="/~", **kwargs):
     """FBI record iterator in path order"""
     n = 0
     search_after = search_after
@@ -108,6 +108,13 @@ def fbi_count(after="/", stop="~", item_type=None):
 def fbi_count_in_dir(directory, item_type=None):
     return fbi_count(after=directory, stop=directory + "/~", item_type=item_type)
 
+@lru_cache(maxsize=1024)
+def fbi_count_in_dir2(directory, **kwargs):
+    """FBI record counter"""
+    query = all_under_query(directory, **kwargs)
+    count = es.count(index=indexname, body=query, request_timeout=900)["count"]
+    return count
+
 def count(path, after=None, stop=None, **kwargs):
     query = all_under_query("/", **kwargs)
     if after and stop:
@@ -118,7 +125,7 @@ def count(path, after=None, stop=None, **kwargs):
         query["query"]["bool"]["must"].append({"range": {"path.keyword": {"lte": stop}}})
     return es.count(index=indexname, body=query, request_timeout=900)["count"]
 
-def all_under_query(path, location=None, name_regex=None, 
+def all_under_query(path="/", location=None, name_regex=None, 
                     include_removed=False, item_type=None, ext=None,
                     since=None, before=None, 
                     audited_since=None, audited_before=None, 
@@ -239,13 +246,6 @@ def last_updated(directory):
         return None
     return convert2datetime(lfile["last_modified"])
 
-@lru_cache(maxsize=1024)
-def fbi_count_in_dir2(directory, item_type=None):
-    """FBI record counter"""
-    query = all_under_query(directory, item_type=item_type)
-    count = es.count(index=indexname, body=query, request_timeout=900)["count"]
-    return count
-
 def get_random_records(path, number, **kwargs):   
     query = all_under_query(path, **kwargs)
     # print(json.dumps(query, indent=4))
@@ -287,15 +287,6 @@ def archive_summary(path, max_types=5, max_vars=1000, max_exts=10,
     return ret
 
 
-def count_from(directory, from_dir):
-    count = 0
-    for record in fbi_listdir(directory, dirs_only=True): 
-        subdir = record["path"]     
-        if subdir > from_dir:
-            continue
-        count += fbi_count_in_dir2(subdir)
-    return count
-
 def next_dir(directory):
     parent = os.path.dirname(directory)
     for record in fbi_listdir(parent):
@@ -318,22 +309,12 @@ def split(splitlist, batch_size):
         new_splits.append((directory, count))
     return new_splits
 
-def random_splits(path, nbatchs=20, **kwargs):
-    paths = get_random(path, nbatchs, **kwargs)
-    paths.append("/~~")
-    paths.insert(0, "/")
-    splits = []
-    for i, path in enumerate(paths[:-1]):
-        c = count(path, after=path, stop=paths[i+1], **kwargs)
-        print(c, path)
-        splits.append((path, paths[i+1], c))
-
-    return splits
 
 def splits(batch_size=10000000, root_path="/"):
     splits = [(root_path, fbi_count_in_dir2(root_path))]
     while True:
         new_splits = split(splits, batch_size=batch_size)
+        print("DIFF", set(new_splits)-set(splits))
         if len(splits) == len(new_splits):
             break
         splits = new_splits
@@ -388,30 +369,7 @@ def fbi_listdir(directory, fetch_size=10000, dirs_only=False, removed=False, hid
 
     result.sort(key=lambda q: q["name"])    
     return result
-
-def dir_annotations(path):
-    query = {"query": { "bool": {"must":   
-                [{"term": {"type": {"value": "dir_annotation"}}}],
-                "should": [], "minimum_should_match": 1}}}
- 
-    while path != "/":
-        query["query"]["bool"]["should"].append({"term": {"path.keyword":   {"value": path}}})
-        path = os.path.dirname(path)
-
-    results = es.search(index=indexname, body=query, request_timeout=90)
-    records = []
-    for r in results["hits"]["hits"]:
-        records.append(r["_source"])
-    return records
-
-
-def insert_annotation(record_id, record):
-    """Insert annotation record by replaceing it"""
-    try: 
-        es.delete(index=indexname, id=record_id)
-    except elasticsearch.exceptions.NotFoundError:
-        pass 
-    es.index(index=indexname, id=record_id, body=record, request_timeout=100)   
+  
 
 def insert_item(record):
     """Insert record by replaceing it"""
