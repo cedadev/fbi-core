@@ -6,7 +6,6 @@ import os
 import hashlib
 import json
 import re
-from functools import lru_cache
 from .conf import APIKEY
 
 if APIKEY:
@@ -16,7 +15,7 @@ else:
     
 indexname = "fbi-2022"
 
-def fbi_records(after="/", stop="~", fetch_size=10000, exclude_phenomena=False, item_type=None):
+def fbi_records(after="/", stop="~", fetch_size=10000, exclude_phenomena=False, item_type=None, **kwargs):
     """
     FBI record iterator. The is implicitly in path order. 
     
@@ -60,18 +59,37 @@ def fbi_records_under(path="/", fetch_size=10000, exclude_phenomena=False, searc
     """FBI record iterator in path order"""
     n = 0
     search_after = search_after
-    path = os.path.commonpath((search_after, search_stop))
+    #path = os.path.commonpath((search_after, search_stop))
     query = all_under_query(path, **kwargs)
     if exclude_phenomena:
         query["_source"] = {"exclude": ["phenomena"]}
     query["sort"] = [{ "path.keyword": "asc" }]
     query["size"] = fetch_size
     query["query"]["bool"]["must"].append({"range": {"path.keyword": {"gt": search_after, "lte": search_stop}}})
+   
 
-    for i, record in enumerate(scan(es, index=indexname, size=fetch_size, query=query, request_timeout=900)):
-        if i % 1000 == 0:
-            print(i, record["_source"]["path"])
-        yield record["_source"]
+    print(query)
+#    for i, record in enumerate(scan(es, index=indexname, size=fetch_size, query=query, preserve_order=True, request_timeout=900)):
+        #if i % 1000 == 0:
+        #    print(i, record["_source"]["path"])
+ #       yield record["_source"]
+
+    search_after = ["/"]
+    pit = dict(es.open_point_in_time(index=indexname, keep_alive="1m"))
+    #print(pit)
+
+    while True:
+        result = es.search(body=query, request_timeout=900, search_after=search_after, pit=pit)
+        nfound = len(result["hits"]["hits"])
+        if nfound == 0: 
+            break
+        n += nfound
+
+        search_after = result["hits"]["hits"][-1]["sort"]
+
+        for record in result["hits"]["hits"]:
+            yield record["_source"]
+
 
 
 def where_is(name, fetch_size=10000, removed=False):
@@ -85,60 +103,30 @@ def where_is(name, fetch_size=10000, removed=False):
     return files
 
 
-def ls_query(path, include_removed=False, size=10000, **kwargs):
+def ls_query(path, size=10000, **kwargs):
     """ls for fbi
     
     :param str path:
     :param **kwrargs: Any options from all_under_query
     :return list[dict]: FBI records.
     """
-    query = all_under_query(path, include_removed=include_removed, **kwargs)
-    
-    query["size"] = size
-    results = es.search(index=indexname, body=query)
-    files = []
-    for r in results["hits"]["hits"]:
-        files.append(r["_source"])
+    for r in fbi_records_under(path, **kwargs):
+        yield r
 
     return files
 
-def fbi_count(after="/", stop="~", item_type=None):
-    """FBI record counter"""
-    query = {"query": {"bool": {"must": [{"range": {"path.keyword": {"gt": after, "lte": stop}}}],
-                               "must_not": [{"exists": {"field": "removed"}}] }}}
-    if item_type:
-        query["query"]["bool"]["must"].append({"term": {"type": {"value": item_type}}})
-    count = es.count(index=indexname, body=query, request_timeout=900)["count"]
-    return count
-
-@lru_cache(maxsize=1024)
-def fbi_count_in_dir(directory, item_type=None):
-    return fbi_count(after=directory, stop=directory + "/~", item_type=item_type)
-
-@lru_cache(maxsize=1024)
-def fbi_count_in_dir2(directory, **kwargs):
-    """FBI record counter"""
-    query = all_under_query(directory, **kwargs)
-    count = es.count(index=indexname, body=query, request_timeout=900)["count"]
-    return count
-
-def count(path, after=None, stop=None, **kwargs):
-    query = all_under_query("/", **kwargs)
-    if after and stop:
-        query["query"]["bool"]["must"].append({"range": {"path.keyword": {"gt": after, "lte": stop}}})
-    elif after:
-        query["query"]["bool"]["must"].append({"range": {"path.keyword": {"gt": after}}})
-    elif stop:
-        query["query"]["bool"]["must"].append({"range": {"path.keyword": {"lte": stop}}})
+def count(path, **kwargs):
+    query = all_under_query(path, **kwargs)
     return es.count(index=indexname, body=query, request_timeout=900)["count"]
 
-def all_under_query(path="/", location=None, name_regex=None, 
+def all_under_query(path, location=None, name_regex=None, 
                     include_removed=False, item_type=None, ext=None,
                     since=None, before=None, 
                     audited_since=None, audited_before=None, 
                     corrupt_since=None, corrupt_before=None, 
                     with_field=None, without=None, blank=None, 
-                    maxsize=None, minsize=None):
+                    maxsize=None, minsize=None, 
+                    after=None, stop=None):
     """
     Make elastic search query for FBI records. 
 
@@ -159,7 +147,9 @@ def all_under_query(path="/", location=None, name_regex=None,
     :param str blank: Search for items where this field is an empty string.
     :param int maxsize: Search for items smaller than this size in bytes.
     :param int minsize: Search for items larger than this size in bytes.
-    
+    :param str after: Search items where path is lexically after this.
+    :param str stop: Search items where path is lexically before this.
+
     :return dict: Elasticsearch query which could be used by the elacticsearch client. 
     """
     if path == "/":
@@ -180,8 +170,8 @@ def all_under_query(path="/", location=None, name_regex=None,
     if blank:
         must.append({"term": {blank: {"value": ""}}})
 
-    must_not.append({"term": {"name.keyword": {"value": ".ftpaccess" }}})
-    must_not.append({"term": {"name.keyword": {"value": "00README_catalogue_and_licence.txt" }}})
+    #must_not.append({"term": {"name.keyword": {"value": ".ftpaccess" }}})
+    #must_not.append({"term": {"name.keyword": {"value": "00README_catalogue_and_licence.txt" }}})
 
     if item_type is not None:
         must.append({"term": {"type": {"value": item_type}}})
@@ -217,6 +207,12 @@ def all_under_query(path="/", location=None, name_regex=None,
     if corrupt_before is not None:
         must.append({"range": {"corrupted": {"lte": corrupt_before}}})
 
+    if after and stop:
+        must.append({"range": {"path.keyword": {"gt": after, "lte": stop}}})
+    elif after:
+        must.append({"range": {"path.keyword": {"gt": after}}})
+    elif stop:
+        must.append({"range": {"path.keyword": {"lte": stop}}})
 
     if location is not None:
         must.append({"term": {"location": location}})
@@ -295,24 +291,7 @@ def archive_summary(path, max_types=5, max_vars=1000, max_exts=10,
     return ret
 
 
-def next_dir(directory):
-    parent = os.path.dirname(directory)
-    for record in fbi_listdir(parent):
-        subdir = record["path"]
-        if subdir > directory: 
-            return subdir
-    return next_dir(parent)         
-def count_from(directory, from_dir):
-    count = 0
-    for record in fbi_listdir(directory, dirs_only=True): 
-        subdir = record["path"]     
-        if subdir > from_dir:
-            continue
-        count += fbi_count_in_dir2(subdir)
-    return count      
-
-
-def _split(splitlist, batch_size):
+def _split(splitlist, batch_size, **kwargs):
     """
     Divide a list of directories into by adding subdirectories if there are too many items in a directory.
 
@@ -320,39 +299,37 @@ def _split(splitlist, batch_size):
                            e.g. [("/x/y", 100)] may expand to [("/x/y/a", 50), ("/x/y/b", 10), ("/x/y/c", 40),]
     """
     new_splits = []
-    for directory, count in splitlist:
-        if count > batch_size:
+    for directory, split_count in splitlist:
+        if split_count > batch_size:
             subdirs = fbi_listdir(directory, dirs_only=True)
             for subdir in subdirs:
                 subdir_path = subdir["path"]
-                sub_count = fbi_count_in_dir2(subdir_path)
+                sub_count = count(subdir_path, **kwargs)
                 new_splits.append((subdir_path, sub_count))
-                count -= sub_count
-        new_splits.append((directory, count))
+                split_count -= sub_count
+        new_splits.append((directory, split_count))
     return new_splits
 
-def splits(batch_size=10000000):
-    splits = [("/", fbi_count_in_dir2("/"))]
+def splits(path, batch_size=10000000, **kwargs):
+    splits = [(path, count(path, **kwargs))]
     while True:
-        new_splits = split(splits, batch_size=batch_size)
+        new_splits = _split(splits, batch_size=batch_size, **kwargs)
         if len(splits) == len(new_splits):
             break
         splits = new_splits
  
     splits.sort()
     merged = []
-    count = 0
-    after = root_path
+    batch_count = 0
+    after = path
     for d, c in splits:
-        if count + c > batch_size:
-            merged.append((after, d, count))
+        if batch_count + c > batch_size:
+            merged.append((after, d, batch_count))
             after = d
-            count = 0
-        count += c
-    merged.append((after, root_path+"~", count))
+            batch_count = 0
+        batch_count += c
+    merged.append((after, path+"~", batch_count))
 
-    for d, s, c in merged:
-        print(d, s, c)
     return merged
 
 def make_dirs(directory):
@@ -376,7 +353,7 @@ def make_dirs(directory):
 
 
 def fbi_listdir(directory, fetch_size=10000, dirs_only=False, removed=False, hidden=True):
-    """FBI record iterator for a directory"""
+    """FBI record list for a directory"""
     must = [{"term": {"directory.keyword": {"value": directory}}}]
     if dirs_only:
         must.append({"term": {"type": {"value": "dir"}}})
@@ -411,6 +388,7 @@ def update_item(record):
     es.update(index=indexname, id=_create_id(record["path"]), body=document, request_timeout=100)
 
 def flag_removed(record):
+    """Mark a file as removed by adding a removed date."""
     fbi_rec = get_record(record["path"])
     if fbi_rec is None:
         return
