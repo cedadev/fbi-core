@@ -19,11 +19,7 @@ class FBIBatch:
         self.start_count = start_count
         self.summary = {}   # an dict to store any summary info for batch.
         if os.path.exists(self.batch_savefile):
-            state = json.load(open(self.batch_savefile))
-            self.after = state["after"]
-            self.current = state["current"]
-            self.stop = state["stop"]
-            self.start_count = state["start_count"]
+            self.load()
         else:
             self.save()
 
@@ -57,9 +53,7 @@ class FBIBatch:
     def batch_savefile(self):
         return os.path.join(self.run.name, f"batch{self.number}.json")
 
-    def 
-
-
+    
 class FBIBatchRun:
 
     def __init__(self, dir_name, batch_size=1000000):
@@ -75,7 +69,7 @@ class FBIBatchRun:
 
     @property
     def statefile(self):
-        return os.path.join(self.name, "state.json")
+        return os.path.join(self.dir_name, "state.json")
     
     def make_new_batches(self, batch_size):
         os.makedirs(self.dir_name, exist_ok=True)
@@ -87,7 +81,7 @@ class FBIBatchRun:
 
     def save(self):
         with open(self.statefile, "w") as f:
-            json.dump({"batches": self.batches, "run": self.name}, f)
+            json.dump({"batches": self.batches, "run": self.dir_name}, f)
 
 
 

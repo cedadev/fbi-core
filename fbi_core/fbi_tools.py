@@ -110,10 +110,9 @@ def ls_query(path, size=10000, **kwargs):
     :param **kwrargs: Any options from all_under_query
     :return list[dict]: FBI records.
     """
-    for r in fbi_records_under(path, **kwargs):
-        yield r
-
-    return files
+    for i, rec in enumerate(fbi_records_under(path, **kwargs)):
+        yield rec
+        if i > size: break
 
 def count(path, **kwargs):
     query = all_under_query(path, **kwargs)
