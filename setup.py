@@ -51,7 +51,10 @@ setup(
             'fbi_rsplit=fbi_core.fbi_filesize:find_rsplits',
             'fbi_md5sum=fbi_core.fbi_filesize:md5sum',
             'fbi_md5sum_check=fbi_core.fbi_filesize:check_archive_by_checksum',
-            'fbi_dump=fbi_core.fbi_dump:main',
+            'fbi_dump=fbi_core.fbi_dump:setup_run',
+            'fbi_batch_create=fbi_core.fbi_dump:setup_run',
+            'fbi_launch_run=fbi_core.fbi_dump:launch_run',
+            'fbi_batch_run=fbi_core.fbi_dump:batch_run',
         ],
     },
 )
