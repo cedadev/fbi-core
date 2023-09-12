@@ -7,6 +7,7 @@ import tabulate
 import colorama
 from .format_utils import sizeof_fmt
 from .fbi_tools import get_record, archive_summary, ls_query, parameters, lastest_file, convert2datetime, get_random,  fbi_records, fbi_records_under, get_records_by_content, splits
+import time
 
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 
@@ -33,7 +34,9 @@ class FilterCommand(click.Command):
             click.core.Option(("--with-field",), metavar="FIELD", help="Only pick files with this field in the record."),
             click.core.Option(("--maxsize",), type=int, metavar='SIZE', help="Only pick files with size less then SIZE."),
             click.core.Option(("--minsize",), type=int, metavar='SIZE', help="Only pick files with size greater then SIZE."),
-            click.core.Option(("--include-removed",), is_flag=True, show_default=True, help="inculde removed items.")]
+            click.core.Option(("--include-removed",), is_flag=True, show_default=True, help="inculde removed items."),
+            click.core.Option(("--after",), metavar="PATH", help="Records where path is lexically after this."),
+            click.core.Option(("--stop",), metavar="PATH", help="Records where path is lexically before this."),]
         for o in reversed(options):
             self.params.insert(0, o)
 
@@ -41,10 +44,16 @@ class FilterCommand(click.Command):
 @click.command(cls=FilterCommand)
 @click.argument("paths", nargs=-1)
 def ls(paths, **kwargs):
+    t0 =  time.time()
+    t00 = time.time()
     for path in paths:
-        for f in fbi_records(after=path, stop=path+"/~",  **kwargs):
+        for i, f in enumerate(fbi_records_under(path,  **kwargs)):
         #for f in fbi_records_under(path, **kwargs):
-            print(f["path"])
+            if i % 10000 == 0:
+                rate = 10000/(time.time() - t0)
+                trate = i/(time.time() - t00)
+                t0 = time.time()
+                print(f'{i}: [{int(trate)} {int(rate)}]{f["path"]}')
 
 @click.command(cls=FilterCommand)
 @click.argument("paths", nargs=-1)

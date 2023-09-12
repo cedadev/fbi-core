@@ -55,37 +55,48 @@ def fbi_records(after="/", stop="~", fetch_size=10000, exclude_phenomena=False, 
                 yield record["_source"]
 
 
-def fbi_records_under(path="/", fetch_size=10000, exclude_phenomena=False, search_after="/", search_stop="/~", **kwargs):
+def fbi_records_under(path="/", fetch_size=10000, exclude_phenomena=False, **kwargs):
     """FBI record iterator in path order"""
     n = 0
-    search_after = search_after
+    search_after = [path]
+    print(search_after)
+    current_scope = path
     #path = os.path.commonpath((search_after, search_stop))
     query = all_under_query(path, **kwargs)
     if exclude_phenomena:
         query["_source"] = {"exclude": ["phenomena"]}
     query["sort"] = [{ "path.keyword": "asc" }]
     query["size"] = fetch_size
-    query["query"]["bool"]["must"].append({"range": {"path.keyword": {"gt": search_after, "lte": search_stop}}})
-   
-
+    
     print(query)
-#    for i, record in enumerate(scan(es, index=indexname, size=fetch_size, query=query, preserve_order=True, request_timeout=900)):
-        #if i % 1000 == 0:
-        #    print(i, record["_source"]["path"])
- #       yield record["_source"]
-
-    search_after = ["/"]
-    pit = dict(es.open_point_in_time(index=indexname, keep_alive="1m"))
+    #pit = dict(es.open_point_in_time(index=indexname, keep_alive="1m"))
     #print(pit)
 
     while True:
-        result = es.search(body=query, request_timeout=900, search_after=search_after, pit=pit)
+        #result = es.search(body=query, request_timeout=900, search_after=search_after, pit=pit)
+        result = es.search(index=indexname, body=query, request_timeout=900, search_after=search_after)
+        #print(result)
         nfound = len(result["hits"]["hits"])
-        if nfound == 0: 
+        print(f"found: {nfound}")
+        if nfound == 0 and current_scope == path:
             break
+        if nfound == 0: 
+            # expand scope
+            current_scope = max(os.path.dirname(os.path.dirname(current_scope)), path)
+            print(f"EXPAND SCOPE: {current_scope}")
+        if nfound > 9000:
+            # narrow scope
+            lastpath = result["hits"]["hits"][-1]["_source"]["path"]
+            current_scope_depth = len(current_scope.split("/"))
+            current_scope = "/".join(lastpath.split("/")[:current_scope_depth+1])
+            print(f"NARROW SCOPE: {current_scope}")
+        query = all_under_query(current_scope, **kwargs)
+        query["sort"] = [{ "path.keyword": "asc" }]
+        query["size"] = fetch_size    
         n += nfound
+        if len(result["hits"]["hits"]) > 0:
+            search_after = result["hits"]["hits"][-1]["sort"]
 
-        search_after = result["hits"]["hits"][-1]["sort"]
 
         for record in result["hits"]["hits"]:
             yield record["_source"]
