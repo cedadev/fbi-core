@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <title>fbi_core module &#8212; fbi-core 0.1 documentation</title>
-    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b76e3c8a" />
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
     <link rel="stylesheet" type="text/css" href="_static/classic.css?v=89b800e6" />
     
     <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js?v=e031e9a9"></script>
@@ -43,13 +43,13 @@
 <span id="fbi-core-module"></span><h1>fbi_core module<a class="headerlink" href="#module-fbi_core" title="Permalink to this heading">¶</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="fbi_core.all_under_query">
-<span class="sig-prename descclassname"><span class="pre">fbi_core.</span></span><span class="sig-name descname"><span class="pre">all_under_query</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">location</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name_regex</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_removed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">item_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ext</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">since</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">before</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">audited_since</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">audited_before</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">corrupt_since</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">corrupt_before</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">with_field</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">without</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">blank</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fbi_core.all_under_query" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">fbi_core.</span></span><span class="sig-name descname"><span class="pre">all_under_query</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">location</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name_regex</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_removed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">item_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ext</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">since</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">before</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">audited_since</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">audited_before</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">corrupt_since</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">corrupt_before</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">with_field</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">without</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">blank</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">after</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fbi_core.all_under_query" title="Permalink to this definition">¶</a></dt>
 <dd><p>Make elastic search query for FBI records.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>path</strong> (<em>str</em>) – The path to search under.</p></li>
-<li><p><strong>path</strong> – Media location, either on_disk or on_tape</p></li>
+<li><p><strong>location</strong> (<em>str</em>) – Media location, either on_disk or on_tape. Default is all locations.</p></li>
 <li><p><strong>name_regex</strong> (<em>str</em>) – A regular expression to match against the file or directory name.</p></li>
 <li><p><strong>include_removed</strong> (<em>bool</em>) – Flag to include removed items in the search.</p></li>
 <li><p><strong>item_type</strong> (<em>str</em>) – Item type for the record. Either “file”, “dir” or “link”.</p></li>
@@ -64,7 +64,9 @@
 <li><p><strong>without</strong> (<em>str</em>) – Search for items where this field does not exist.</p></li>
 <li><p><strong>blank</strong> (<em>str</em>) – Search for items where this field is an empty string.</p></li>
 <li><p><strong>maxsize</strong> (<em>int</em>) – Search for items smaller than this size in bytes.</p></li>
-<li><p><strong>maxsize</strong> – Search for items larger than this size in bytes.</p></li>
+<li><p><strong>minsize</strong> (<em>int</em>) – Search for items larger than this size in bytes.</p></li>
+<li><p><strong>after</strong> (<em>str</em>) – Search items where path is lexically after this.</p></li>
+<li><p><strong>stop</strong> (<em>str</em>) – Search items where path is lexically before this.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return dict<span class="colon">:</span></dt>
@@ -86,38 +88,41 @@
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="fbi_core.fbi_count">
-<span class="sig-prename descclassname"><span class="pre">fbi_core.</span></span><span class="sig-name descname"><span class="pre">fbi_count</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">after</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'~'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">item_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fbi_core.fbi_count" title="Permalink to this definition">¶</a></dt>
-<dd><p>FBI record counter</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="fbi_core.fbi_count_in_dir2">
-<span class="sig-prename descclassname"><span class="pre">fbi_core.</span></span><span class="sig-name descname"><span class="pre">fbi_count_in_dir2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">directory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">item_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fbi_core.fbi_count_in_dir2" title="Permalink to this definition">¶</a></dt>
-<dd><p>FBI record counter</p>
-</dd></dl>
-
-<dl class="py function">
 <dt class="sig sig-object py" id="fbi_core.fbi_listdir">
 <span class="sig-prename descclassname"><span class="pre">fbi_core.</span></span><span class="sig-name descname"><span class="pre">fbi_listdir</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">directory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fetch_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dirs_only</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">removed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hidden</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fbi_core.fbi_listdir" title="Permalink to this definition">¶</a></dt>
-<dd><p>FBI record iterator for a directory</p>
+<dd><p>FBI record list for a directory</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="fbi_core.fbi_records">
-<span class="sig-prename descclassname"><span class="pre">fbi_core.</span></span><span class="sig-name descname"><span class="pre">fbi_records</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">after</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'~'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fetch_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude_phenomena</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">item_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fbi_core.fbi_records" title="Permalink to this definition">¶</a></dt>
-<dd><p>FBI record iterator in path order.</p>
+<span class="sig-prename descclassname"><span class="pre">fbi_core.</span></span><span class="sig-name descname"><span class="pre">fbi_records</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">after</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'~'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fetch_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude_phenomena</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">item_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fbi_core.fbi_records" title="Permalink to this definition">¶</a></dt>
+<dd><p>FBI record iterator. The is implicitly in path order.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>after</strong> (<em>str</em>) – paths after are iterated over. Defaults to “/”</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>after</strong> (<em>str</em>) – paths after this are iterated over. Defaults to “/”</p></li>
+<li><p><strong>stop</strong> (<em>str</em>) – iteration stops when the path is greater than or equal to this. Defaults to “~”</p></li>
+<li><p><strong>fetch_size</strong> (<em>int</em>) – The number of records to request from elasticsearch at a time.</p></li>
+<li><p><strong>exclude_phenomena</strong> (<em>bool</em>) – remove the bulky phenomena attribute from the record. Default is False.</p></li>
+<li><p><strong>item_type</strong> (<em>str</em>) – Item type for the records. Either “file”, “dir” or “link”. Defaults to all types.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return iterator[dict]<span class="colon">:</span></dt>
+<dd class="field-even"><p>Yeilds FBI records as dictionaries.</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="fbi_core.fbi_records_under">
-<span class="sig-prename descclassname"><span class="pre">fbi_core.</span></span><span class="sig-name descname"><span class="pre">fbi_records_under</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fetch_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude_phenomena</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">search_after</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fbi_core.fbi_records_under" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">fbi_core.</span></span><span class="sig-name descname"><span class="pre">fbi_records_under</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fetch_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude_phenomena</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fbi_core.fbi_records_under" title="Permalink to this definition">¶</a></dt>
 <dd><p>FBI record iterator in path order</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fbi_core.flag_removed">
+<span class="sig-prename descclassname"><span class="pre">fbi_core.</span></span><span class="sig-name descname"><span class="pre">flag_removed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">record</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fbi_core.flag_removed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Mark a file as removed by adding a removed date.</p>
 </dd></dl>
 
 <dl class="py function">
@@ -149,7 +154,7 @@ Optionaly make it match a filename and a parent directory.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="fbi_core.ls_query">
-<span class="sig-prename descclassname"><span class="pre">fbi_core.</span></span><span class="sig-name descname"><span class="pre">ls_query</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_removed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10000</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fbi_core.ls_query" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">fbi_core.</span></span><span class="sig-name descname"><span class="pre">ls_query</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10000</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fbi_core.ls_query" title="Permalink to this definition">¶</a></dt>
 <dd><p>ls for fbi</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -161,6 +166,17 @@ Optionaly make it match a filename and a parent directory.</p>
 </dd>
 <dt class="field-even">Return list[dict]<span class="colon">:</span></dt>
 <dd class="field-even"><p>FBI records.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fbi_core.make_dirs">
+<span class="sig-prename descclassname"><span class="pre">fbi_core.</span></span><span class="sig-name descname"><span class="pre">make_dirs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">directory</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fbi_core.make_dirs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Make FBI records for a diretory and any missing parent directories.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>directory</strong> (<em>str</em>) – The directory to add.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -199,15 +215,15 @@ Optionaly make it match a filename and a parent directory.</p>
 <li><a class="reference internal" href="#fbi_core.all_under_query"><code class="docutils literal notranslate"><span class="pre">all_under_query()</span></code></a></li>
 <li><a class="reference internal" href="#fbi_core.archive_summary"><code class="docutils literal notranslate"><span class="pre">archive_summary()</span></code></a></li>
 <li><a class="reference internal" href="#fbi_core.bulk_update"><code class="docutils literal notranslate"><span class="pre">bulk_update()</span></code></a></li>
-<li><a class="reference internal" href="#fbi_core.fbi_count"><code class="docutils literal notranslate"><span class="pre">fbi_count()</span></code></a></li>
-<li><a class="reference internal" href="#fbi_core.fbi_count_in_dir2"><code class="docutils literal notranslate"><span class="pre">fbi_count_in_dir2()</span></code></a></li>
 <li><a class="reference internal" href="#fbi_core.fbi_listdir"><code class="docutils literal notranslate"><span class="pre">fbi_listdir()</span></code></a></li>
 <li><a class="reference internal" href="#fbi_core.fbi_records"><code class="docutils literal notranslate"><span class="pre">fbi_records()</span></code></a></li>
 <li><a class="reference internal" href="#fbi_core.fbi_records_under"><code class="docutils literal notranslate"><span class="pre">fbi_records_under()</span></code></a></li>
+<li><a class="reference internal" href="#fbi_core.flag_removed"><code class="docutils literal notranslate"><span class="pre">flag_removed()</span></code></a></li>
 <li><a class="reference internal" href="#fbi_core.get_records_by_content"><code class="docutils literal notranslate"><span class="pre">get_records_by_content()</span></code></a></li>
 <li><a class="reference internal" href="#fbi_core.insert_item"><code class="docutils literal notranslate"><span class="pre">insert_item()</span></code></a></li>
 <li><a class="reference internal" href="#fbi_core.lastest_file"><code class="docutils literal notranslate"><span class="pre">lastest_file()</span></code></a></li>
 <li><a class="reference internal" href="#fbi_core.ls_query"><code class="docutils literal notranslate"><span class="pre">ls_query()</span></code></a></li>
+<li><a class="reference internal" href="#fbi_core.make_dirs"><code class="docutils literal notranslate"><span class="pre">make_dirs()</span></code></a></li>
 <li><a class="reference internal" href="#fbi_core.nla_dirs"><code class="docutils literal notranslate"><span class="pre">nla_dirs()</span></code></a></li>
 <li><a class="reference internal" href="#fbi_core.update_item"><code class="docutils literal notranslate"><span class="pre">update_item()</span></code></a></li>
 <li><a class="reference internal" href="#fbi_core.where_is"><code class="docutils literal notranslate"><span class="pre">where_is()</span></code></a></li>
