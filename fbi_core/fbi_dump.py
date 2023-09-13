@@ -96,6 +96,11 @@ class FBIBatch:
     def is_running(self):
         return self.processing_pid and process_exists(self.processing_pid)
 
+    def kill(self):
+        os.kill(self.processing_pid, signal.SIGINT)
+        self.processing_pid = None
+        self.save()
+
     @property
     def batch_savefile(self):
         return self.run.batch_savefile(self.batch_number)
@@ -127,8 +132,8 @@ def dump(batch):
     label = batch.batch_number
     output_dir = "./output"
     os.makedirs(output_dir, exist_ok=True)
-    output_file = f"{output_dir}/{label}.json"
-    with open(output_file, 'w') as fh:
+    output_file = f"{output_dir}/{label}.jsonl"
+    with open(output_file, 'a') as fh:
         for record in batch.records():
             fh.write(json.dumps(record) + "\n")
 
@@ -208,10 +213,9 @@ class FBIBatchRun:
         """kill the active run process if not this instance."""
         if not self.active and process_exists(self.active_run_pid):
             os.kill(self.active_run_pid, signal.SIGINT)
+            self.save()
         for b in self.batches:
-            batch_state = self.batch_state(b.number)
-            if process_exists(batch_state.pid):
-                os.kill(batch_state.pid, signal.SIGINT)
+            b.kill()
 
     def make_new_batches(self, path, batch_size=1000000, **kwargs):
         if len(self.batches) > 0:
