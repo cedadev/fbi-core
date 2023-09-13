@@ -19,7 +19,6 @@ FBIBatchState = namedtuple('FBIBatchState', ['number', 'after', 'stop', "start_c
 
 def process_exists(pid):
     """Helper function to detect if a process is running"""
-    print(os.getpid(), pid, "yyyyyyyyy")
     try:
         os.kill(pid, 0)
     except OSError:
@@ -112,14 +111,11 @@ class FBIBatch:
         query_args = self.run.base_query.copy()
         query_args["after"] = self.current
         query_args["stop"] = self.stop
-        print(query_args)
         for record in fbi_records_under("/", **query_args):
             self.current = record["path"]
             self.number_processed += 1
             if self.number_processed % self.run.batch_state_save_frequency == 0: 
-                print(self.batch_number, self.number_processed, self.current)
                 self.save()
-                time.sleep(0.3)
             yield record
         self.current = self.stop
         self.processing_pid = None
@@ -246,10 +242,11 @@ class FBIBatchRun:
         grand_batch = 0
         for b in self.batches:
             b.load()
-            start_count = max(b.start_count,1) 
-            grand_batch += start_count
-            grand_total += total
-            percent = 100*total/start_count
+            start_count = max(b.start_count, 1) 
+            grand_batch += b.start_count
+            grand_total += b.number_processed
+            total = b.number_processed
+            percent = 100 * total / start_count
             done = ""
             if b.is_running(): done = "Running"
             if b.is_complete(): done += " Complete"
@@ -267,27 +264,17 @@ class FBIBatchRun:
             number_to_start = self.parallel_processes
             for batch in self.batches:
                 batch.load()
-                print(f"{batch.batch_number}: running: {batch.is_running()} complete: {batch.is_complete()}")
                 if not batch.is_running() and not batch.is_complete() and number_to_start > 0:
                     number_to_start -= 1
-                    #subprocess.Popen(["python", "-c", "'print(33333)'"])
-                    print(os.getpid())
-                    p = subprocess.Popen(["python", "/Users/sam.pepler/play/fbi-core/venv/bin/fbi_batch_run", self.dir_name, str(batch.batch_number)])
+                    subprocess.Popen(["fbi_batch_run", self.dir_name, str(batch.batch_number)])
                     
-                    #pid = subprocess.Popen(["echo", self.dir_name, str(batch.batch_number)]).pid
-
                     print(f"+++ Starting batch {batch.batch_number}")
-                else:
-                    print(f"--- Not starting batch {batch.batch_number}")
-                time.sleep(0.2)
+                time.sleep(0.02)
                 
-            print("looked at all batches")
             if self.is_complete():
                 print("Break as complete")
                 break
-            print("...sleep...")
-            time.sleep(5)
-            print("loop")         
+            time.sleep(5)        
 
 
 @click.command(cls=FilterCommand, context_settings=CONTEXT_SETTINGS)
@@ -303,7 +290,7 @@ def setup_run(run_name, function_name, parallel_processes, records_per_batch, ba
     run = FBIBatchRun(run_name, function_name, parallel_processes=parallel_processes, batch_state_save_frequency=batch_state_save_frequency)
     run.make_new_batches(path, batch_size=records_per_batch, **kwargs) 
     if not setup_only:
-        os.system(f"fbi_batch_run {run.dir_name} &")
+        os.system(f"fbi_launch_run {run.dir_name} &")
 
 
 @click.command()
@@ -332,9 +319,5 @@ def batch_run(run_name, batch_number):
     batch =  FBIBatch(run, batch_number)
     if not batch.is_running(): 
         run.func(batch)
-        print(" I truely ran the func...")
     else:
         print("Tried to start batch that was already running.")
- 
-
-    

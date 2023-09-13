@@ -59,7 +59,6 @@ def fbi_records_under(path="/", fetch_size=10000, exclude_phenomena=False, **kwa
     """FBI record iterator in path order"""
     n = 0
     search_after = [path]
-    print(search_after)
     current_scope = path
     #path = os.path.commonpath((search_after, search_stop))
     query = all_under_query(path, **kwargs)
@@ -67,36 +66,26 @@ def fbi_records_under(path="/", fetch_size=10000, exclude_phenomena=False, **kwa
         query["_source"] = {"exclude": ["phenomena"]}
     query["sort"] = [{ "path.keyword": "asc" }]
     query["size"] = fetch_size
-    
-    print(query)
-    #pit = dict(es.open_point_in_time(index=indexname, keep_alive="1m"))
-    #print(pit)
 
     while True:
-        #result = es.search(body=query, request_timeout=900, search_after=search_after, pit=pit)
         result = es.search(index=indexname, body=query, request_timeout=900, search_after=search_after)
-        #print(result)
         nfound = len(result["hits"]["hits"])
-        print(f"found: {nfound}")
         if nfound == 0 and current_scope == path:
             break
         if nfound == 0: 
             # expand scope
             current_scope = max(os.path.dirname(os.path.dirname(current_scope)), path)
-            print(f"EXPAND SCOPE: {current_scope}")
         if nfound > 9000:
             # narrow scope
             lastpath = result["hits"]["hits"][-1]["_source"]["path"]
             current_scope_depth = len(current_scope.split("/"))
             current_scope = "/".join(lastpath.split("/")[:current_scope_depth+1])
-            print(f"NARROW SCOPE: {current_scope}")
         query = all_under_query(current_scope, **kwargs)
         query["sort"] = [{ "path.keyword": "asc" }]
         query["size"] = fetch_size    
         n += nfound
         if len(result["hits"]["hits"]) > 0:
             search_after = result["hits"]["hits"][-1]["sort"]
-
 
         for record in result["hits"]["hits"]:
             yield record["_source"]
@@ -327,7 +316,7 @@ def splits(path, batch_size=10000000, **kwargs):
         if len(splits) == len(new_splits):
             break
         splits = new_splits
- 
+
     splits.sort()
     merged = []
     batch_count = 0

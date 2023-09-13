@@ -43,7 +43,7 @@ class FilterCommand(click.Command):
 
 @click.command(cls=FilterCommand)
 @click.argument("paths", nargs=-1)
-def ls(paths, **kwargs):
+def ls2(paths, **kwargs):
     t0 =  time.time()
     t00 = time.time()
     for path in paths:
@@ -54,6 +54,14 @@ def ls(paths, **kwargs):
                 trate = i/(time.time() - t00)
                 t0 = time.time()
                 print(f'{i}: [{int(trate)} {int(rate)}]{f["path"]}')
+            print(f["path"])
+
+@click.command(cls=FilterCommand)
+@click.argument("paths", nargs=-1)
+def ls(paths, **kwargs):
+    for path in paths:
+        for f in fbi_records_under(path,  **kwargs):
+            print(f["path"])
 
 @click.command(cls=FilterCommand)
 @click.argument("paths", nargs=-1)
