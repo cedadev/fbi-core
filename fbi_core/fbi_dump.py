@@ -97,7 +97,8 @@ class FBIBatch:
         return self.processing_pid and process_exists(self.processing_pid)
 
     def kill(self):
-        os.kill(self.processing_pid, signal.SIGINT)
+        if self.processing_pid and process_exists(self.processing_pid):
+            os.kill(self.processing_pid, signal.SIGINT)
         self.processing_pid = None
         self.save()
 
