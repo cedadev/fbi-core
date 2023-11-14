@@ -55,6 +55,7 @@ setup(
             'fbi_batch_create=fbi_core.fbi_dump:setup_run',
             'fbi_launch_run=fbi_core.fbi_dump:launch_run',
             'fbi_batch_run=fbi_core.fbi_dump:batch_run',
+            'fbi_links_to=fbi_core.fbi_filesize:find_links_to',
         ],
     },
 )

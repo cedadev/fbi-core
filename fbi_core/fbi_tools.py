@@ -236,6 +236,21 @@ def lastest_file(directory):
     else:
         return None
 
+def links_to(target):
+    """return list of links to an archive target."""
+    query = {"sort" : [{ "path.keyword": "asc" }],
+             "query": {"bool": {"must": [
+                   {"term": {"target": {"value": target}}},
+                   {"term": {"type": {"value": "link"}}}],
+                       "must_not": [{"exists": {"field": "removed" }}]}},
+            "size": 10000}
+    result = es.search(index=indexname, body=query, request_timeout=900)
+
+    links = []
+    for r in result["hits"]["hits"]:
+        links.append(r["_source"]["path"])
+    return links
+
 def convert2datetime(d):
     """Convert a str or int to a datetime"""
     if isinstance(d, int):

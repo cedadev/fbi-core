@@ -6,7 +6,7 @@ import os
 import tabulate
 import colorama
 from .format_utils import sizeof_fmt
-from .fbi_tools import get_record, archive_summary, ls_query, parameters, lastest_file, convert2datetime, get_random,  fbi_records, fbi_records_under, get_records_by_content, splits
+from .fbi_tools import get_record, archive_summary, ls_query, parameters, lastest_file, convert2datetime, get_random,  links_to, fbi_records, fbi_records_under, get_records_by_content, splits
 import time
 
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
@@ -214,6 +214,14 @@ def find_splits(path, number, **kwargs):
     for start, stop, count in sss:
         print(f"{start}, {stop}, {count}")
 
+@click.command()
+@click.argument("paths", nargs=-1)
+def find_links_to(paths):
+    for path in paths:
+        for link in links_to(path):
+            print(link)
+        for link in links_to(path + "/"):
+            print(link)
 
 if __name__ == "__main__":
     show_record()
