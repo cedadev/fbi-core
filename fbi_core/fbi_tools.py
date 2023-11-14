@@ -277,6 +277,7 @@ def archive_summary(path, max_types=5, max_vars=1000, max_exts=10,
                       "exts": {"terms": {"field": "ext", "size": max_exts}},
                       "vars": {"terms": {"field": "phenomena.best_name.keyword", "size": max_vars}}}
 
+    # print(json.dumps(query, indent=4))
     result = es.search(index=indexname, body=query, request_timeout=900)
     aggs = result["aggregations"]
     ret = {"size_stats": aggs["size_stats"]}

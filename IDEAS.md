@@ -78,3 +78,34 @@ Run run_dir
 Batches: ...
 
 ```
+
+
+
+
+# splits revisit
+
+Start at directory A with a target number of items no bigger than T and no smaller than kT.
+The `count` function has after and stop args that count number of item between them.
+The `next_sib` function gets the next sibling directory for A (e.g /z/a next_sib("/z/a") = "/z/b") if there 
+are no direct siblings then use parent 
+A has perent P.
+A has sibling dirs S1, S2, ... Sn after A
+
+Start at A and use next sibling dir as a stop. CA = count(A, S1)
+This counts all items under the directory A + any files bettwen A and S1. 
+
+stop = S1
+C = count(A, S1)
+
+while not selected: 
+  
+  If C > T there is too much in A need to narrow scope.
+    stop = first_subdir(A)
+   
+  else if C < kT there is not enough so move up to P - next stop point is sibling of P 
+    stop = next_sib(A)
+
+  else
+    This is a good selection  
+    selected == C < T and C > kT or reached the end
+
