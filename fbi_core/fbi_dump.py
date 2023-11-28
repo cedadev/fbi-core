@@ -29,15 +29,14 @@ def process_exists(pid):
 
 def load_function(func_str):
     """Helper functions to return a function from a string"""
-    module_components = func_str.split(".")
+    module_components = func_str.split(":")
     if len(module_components) > 1:
-        module_name = ".".join(module_components[:-1])
-        function_name = module_components[-1]
+        module_name, function_name = module_components
         module = importlib.import_module(module_name)
+        print(func_str, module_name, function_name, module)
         return getattr(module, function_name)
     else:
-        function_name = module_components[-1]
-        return getattr(globals()["__builtins__"], function_name)
+        return getattr(globals()["__builtins__"], func_str)
 
 
 class FBIBatch:
