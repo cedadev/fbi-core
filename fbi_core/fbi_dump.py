@@ -30,6 +30,7 @@ def process_exists(pid):
 def load_function(func_str):
     """Helper functions to return a function from a string"""
     module_components = func_str.split(":")
+    print(func_str, module_components)
     if len(module_components) > 1:
         module_name, function_name = module_components
         module = importlib.import_module(module_name)
