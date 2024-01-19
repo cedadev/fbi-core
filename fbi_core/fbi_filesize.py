@@ -34,6 +34,7 @@ class FilterCommand(click.Command):
             click.core.Option(("--with-field",), metavar="FIELD", help="Only pick files with this field in the record."),
             click.core.Option(("--maxsize",), type=int, metavar='SIZE', help="Only pick files with size less then SIZE."),
             click.core.Option(("--minsize",), type=int, metavar='SIZE', help="Only pick files with size greater then SIZE."),
+            click.core.Option(("--fileset",), metavar='FILESET', help="Only pick items in this fileset."),
             click.core.Option(("--include-removed",), is_flag=True, show_default=True, help="inculde removed items."),
             click.core.Option(("--after",), metavar="PATH", help="Records where path is lexically after this."),
             click.core.Option(("--stop",), metavar="PATH", help="Records where path is lexically before this."),]

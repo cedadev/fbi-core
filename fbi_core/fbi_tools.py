@@ -125,6 +125,7 @@ def all_under_query(path, location=None, name_regex=None,
                     corrupt_since=None, corrupt_before=None, 
                     with_field=None, without=None, blank=None, 
                     maxsize=None, minsize=None, 
+                    fileset=None,
                     after=None, stop=None):
     """
     Make elastic search query for FBI records. 
@@ -146,6 +147,7 @@ def all_under_query(path, location=None, name_regex=None,
     :param str blank: Search for items where this field is an empty string.
     :param int maxsize: Search for items smaller than this size in bytes.
     :param int minsize: Search for items larger than this size in bytes.
+    :param str fileset: Search for items in a fileset.
     :param str after: Search items where path is lexically after this.
     :param str stop: Search items where path is lexically before this.
 
@@ -215,6 +217,9 @@ def all_under_query(path, location=None, name_regex=None,
 
     if location is not None:
         must.append({"term": {"location": location}})
+
+    if fileset is not None:
+        must.append({"term": {"fileset": fileset}})
 
     return {"query": {"bool": {"must": must, "must_not": must_not }}}    
 
