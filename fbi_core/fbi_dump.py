@@ -292,6 +292,7 @@ class FBIBatchRun:
 @click.option("--setup-only", help="Do not start the launcher", is_flag=True)
 def setup_run(run_name, function_name, parallel_processes, records_per_batch, batch_state_save_frequency, path, setup_only, **kwargs):
     print()
+    print(function_name, "***")
     run = FBIBatchRun(run_name, function_name, parallel_processes=parallel_processes, batch_state_save_frequency=batch_state_save_frequency)
     run.make_new_batches(path, batch_size=records_per_batch, **kwargs) 
     if not setup_only:
