@@ -485,7 +485,8 @@ def bulk_update(records):
     print(es.bulk(index=indexname, body=body, refresh=True))
 
 def update_file_location(path_list, location): 
-    """Mark list of paths as on media type.
+    """Mark list of paths as on media type. This is for the NLA system to update media
+    movements.
 
     param list pathlist: A list of paths to mark up.
     param str location: "on_disk", "on_tape" or "on_obstore"."""
