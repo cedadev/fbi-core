@@ -189,6 +189,15 @@ Optionaly make it match a filename and a parent directory.</p>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="fbi_core.update_file_location">
+<span class="sig-prename descclassname"><span class="pre">fbi_core.</span></span><span class="sig-name descname"><span class="pre">update_file_location</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">location</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fbi_core.update_file_location" title="Permalink to this definition">¶</a></dt>
+<dd><p>Mark list of paths as on media type. This is for the NLA system to update media
+movements.</p>
+<p>param list pathlist: A list of paths to mark up.
+param str location: “on_disk”, “on_tape” or “on_obstore”.</p>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="fbi_core.update_item">
 <span class="sig-prename descclassname"><span class="pre">fbi_core.</span></span><span class="sig-name descname"><span class="pre">update_item</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">record</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fbi_core.update_item" title="Permalink to this definition">¶</a></dt>
 <dd><p>Update a single document - overwrite feilds in record suplied.</p>
@@ -226,6 +235,7 @@ Optionaly make it match a filename and a parent directory.</p>
 <li><a class="reference internal" href="#fbi_core.ls_query"><code class="docutils literal notranslate"><span class="pre">ls_query()</span></code></a></li>
 <li><a class="reference internal" href="#fbi_core.make_dirs"><code class="docutils literal notranslate"><span class="pre">make_dirs()</span></code></a></li>
 <li><a class="reference internal" href="#fbi_core.nla_dirs"><code class="docutils literal notranslate"><span class="pre">nla_dirs()</span></code></a></li>
+<li><a class="reference internal" href="#fbi_core.update_file_location"><code class="docutils literal notranslate"><span class="pre">update_file_location()</span></code></a></li>
 <li><a class="reference internal" href="#fbi_core.update_item"><code class="docutils literal notranslate"><span class="pre">update_item()</span></code></a></li>
 <li><a class="reference internal" href="#fbi_core.where_is"><code class="docutils literal notranslate"><span class="pre">where_is()</span></code></a></li>
 </ul>
