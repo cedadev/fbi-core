@@ -467,6 +467,21 @@ def bulk_update(records):
     print(body)
     print(es.bulk(index=indexname, body=body, refresh=True))
 
+def update_file_location(path_list, location): 
+    """Mark list of paths as on media type.
+
+    param list pathlist: A list of paths to mark up.
+    param str location: "on_disk", "on_tape" or "on_obstore"."""
+    assert location not in ("on_disk", "on_tape", "on_obstore")
+
+    for path in path_list:
+        rec = get_record(path)
+        if rec is None:
+            raise(ValueError(f"No FBI record for path {path} so can't change to {location}"))
+        if rec.get("location") != location:
+            rec["location"] = location
+            update_item(rec)
+
 def nla_dirs(after="/", stop="/~", fetch_size=10000):
     """FBI record iterator for nla directories"""
     n = 0
