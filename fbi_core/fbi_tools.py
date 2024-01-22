@@ -488,8 +488,8 @@ def update_file_location(path_list, location):
     """Mark list of paths as on media type. This is for the NLA system to update media
     movements.
 
-    param list pathlist: A list of paths to mark up.
-    param str location: "on_disk", "on_tape" or "on_obstore"."""
+    :param list pathlist: A list of paths to mark up.
+    :param str location: "on_disk", "on_tape" or "on_obstore"."""
     assert location in ("on_disk", "on_tape", "on_obstore")
 
     for path in path_list:
