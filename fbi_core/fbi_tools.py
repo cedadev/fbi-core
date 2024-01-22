@@ -269,7 +269,16 @@ def last_updated(directory):
         return None
     return convert2datetime(lfile["last_modified"])
 
-def get_random_records(path, number, **kwargs):   
+def get_random_records(path, number, **kwargs):  
+    """Get a set of random records that match critiria.
+    
+    :param str path: path to pick from.
+    :param int number: Number of records to return.
+    :param **kwrargs: Any options from all_under_query
+
+    :return list[dict]: FBI Records.
+    """
+
     query = all_under_query(path, **kwargs)
     # print(json.dumps(query, indent=4))
     query["random_score"] = {}
@@ -283,6 +292,14 @@ def get_random_records(path, number, **kwargs):
     return recs
 
 def get_random(path, number, **kwargs): 
+    """Get a set of random paths that match critiria.
+    
+    :param str path: path to pick from.
+    :param int number: Number of records to return.
+    :param **kwrargs: Any options from all_under_query
+
+    :return list[str]: Archive paths.
+    """
     recs = get_random_records(path, number, **kwargs)
     return list(map(lambda x: x["path"], recs))
 
@@ -466,6 +483,23 @@ def bulk_update(records):
         #add_item(record)
     print(body)
     print(es.bulk(index=indexname, body=body, refresh=True))
+
+def update_file_location(path_list, location): 
+    """Mark list of paths as on media type.
+
+    param list pathlist: A list of paths to mark up.
+    param str location: "on_disk", "on_tape" or "on_obstore"."""
+    assert location in ("on_disk", "on_tape", "on_obstore")
+
+    for path in path_list:
+        rec = get_record(path)
+        if rec is None:
+            raise(ValueError(f"No FBI record for path {path} so can't change to {location}"))
+        if rec.get("type") != "file":
+            continue
+        if rec.get("location") != location:
+            rec["location"] = location
+            update_item(rec)
 
 def nla_dirs(after="/", stop="/~", fetch_size=10000):
     """FBI record iterator for nla directories"""
