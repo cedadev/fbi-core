@@ -271,9 +271,7 @@ def get_random_records(path, number, **kwargs):
 
     query = all_under_query(path, **kwargs)
     # print(json.dumps(query, indent=4))
-    query["random_score"] = {}
-    query["boost_mode"] = "replace"
-    query = {"function_score": query}
+    query = {"function_score": {"query": query, "random_score": {}, "boost_mode": "replace"}}
     results = es.search(index=indexname, query=query, size=number, request_timeout=900)
     recs = []
     for r in results["hits"]["hits"]:
@@ -408,8 +406,7 @@ def insert_item(record):
 
 def update_item(record):
     """Update a single document - overwrite feilds in record suplied."""
-    document = {'doc': record, 'doc_as_upsert': True}
-    es.update(index=indexname, id=_create_id(record["path"]), doc=document, request_timeout=100)
+    es.update(index=indexname, id=_create_id(record["path"]), doc=record, doc_as_upsert=True, request_timeout=100)
 
 def flag_removed(record):
     """Mark a file as removed by adding a removed date."""
