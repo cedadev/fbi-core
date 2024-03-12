@@ -1,7 +1,7 @@
 from datetime import datetime
 from ceda_es_client import CEDAElasticsearchClient
 import elasticsearch
-from elasticsearch.helpers import scan
+from elasticsearch.helpers import scan, bulk
 import os
 import hashlib
 import json
@@ -29,16 +29,14 @@ def fbi_records(after="/", stop="~", fetch_size=10000, exclude_phenomena=False, 
     n = 0
     current_stop = stop
     while True:
-        query = {
-            "sort" : [{ "path.keyword": "asc" }],
-            "query": {"bool": {"must": [{"range": {"path.keyword": {"gt": after, "lte": current_stop}}}],
-                               "must_not": [{"exists": {"field": "removed"}}] }},
-            "size": fetch_size}
+        sort = [{ "path.keyword": "asc" }]
+        query = {"bool": {"must": [{"range": {"path.keyword": {"gt": after, "lte": current_stop}}}],
+                               "must_not": [{"exists": {"field": "removed"}}] }}
         if exclude_phenomena:
             query["_source"] = {"exclude": ["phenomena"]}
         if item_type:
-            query["query"]["bool"]["must"].append({"term": {"type": {"value": item_type}}})
-        result = es.search(index=indexname, body=query, request_timeout=900)
+            query["bool"]["must"].append({"term": {"type": {"value": item_type}}})
+        result = es.search(index=indexname, query=query, sort=sort, size=fetch_size, request_timeout=900)
         nfound = len(result["hits"]["hits"])
         n += nfound
 
@@ -63,11 +61,10 @@ def fbi_records_under(path="/", fetch_size=10000, exclude_phenomena=False, **kwa
     query = all_under_query(path, **kwargs)
     if exclude_phenomena:
         query["_source"] = {"exclude": ["phenomena"]}
-    query["sort"] = [{ "path.keyword": "asc" }]
-    query["size"] = fetch_size
+    sort = [{ "path.keyword": "asc" }]
 
     while True:
-        result = es.search(index=indexname, body=query, request_timeout=900, search_after=search_after)
+        result = es.search(index=indexname, query=query, size=fetch_size, sort=sort, request_timeout=900, search_after=search_after)
         nfound = len(result["hits"]["hits"])
         if nfound == 0 and current_scope == path:
             break
@@ -79,9 +76,7 @@ def fbi_records_under(path="/", fetch_size=10000, exclude_phenomena=False, **kwa
             lastpath = result["hits"]["hits"][-1]["_source"]["path"]
             current_scope_depth = len(current_scope.split("/"))
             current_scope = "/".join(lastpath.split("/")[:current_scope_depth+1])
-        query = all_under_query(current_scope, **kwargs)
-        query["sort"] = [{ "path.keyword": "asc" }]
-        query["size"] = fetch_size    
+        query = all_under_query(current_scope, **kwargs)   
         n += nfound
         if len(result["hits"]["hits"]) > 0:
             search_after = result["hits"]["hits"][-1]["sort"]
@@ -90,12 +85,10 @@ def fbi_records_under(path="/", fetch_size=10000, exclude_phenomena=False, **kwa
             yield record["_source"]
 
 
-
 def where_is(name, fetch_size=10000, removed=False):
     """retrun records for items named"""
     query = all_under_query("/", name_regex=name, include_removed=removed)
-    query["size"] = fetch_size
-    results = es.search(index=indexname, body=query)
+    results = es.search(index=indexname, query=query, size=fetch_size)
     files = []
     for r in results["hits"]["hits"]:
         files.append(r["_source"])
@@ -115,7 +108,7 @@ def ls_query(path, size=10000, **kwargs):
 
 def count(path, **kwargs):
     query = all_under_query(path, **kwargs)
-    return es.count(index=indexname, body=query, request_timeout=900)["count"]
+    return es.count(index=indexname, query=query, request_timeout=900)["count"]
 
 def all_under_query(path, location=None, name_regex=None, 
                     include_removed=False, item_type=None, ext=None,
@@ -220,7 +213,7 @@ def all_under_query(path, location=None, name_regex=None,
     if fileset is not None:
         must.append({"term": {"fileset": fileset}})
 
-    return {"query": {"bool": {"must": must, "must_not": must_not }}}    
+    return {"bool": {"must": must, "must_not": must_not }}  
 
 def lastest_file(directory):
     """latest file record of last updated file under a path.
@@ -229,9 +222,8 @@ def lastest_file(directory):
     :return dict or None: Record for the last updated file.
     """
     query = all_under_query(directory, item_type="file")
-    query["sort"] = [{"last_modified": {"order": "desc"}}]
-    query["size"] = 1
-    result = es.search(index=indexname, body=query, request_timeout=900)
+    sort = [{"last_modified": {"order": "desc"}}]
+    result = es.search(index=indexname, query=query, sort=sort, size=1, request_timeout=900)
     if len(result["hits"]["hits"]) == 0:
         return None
     last_record = result["hits"]["hits"][0]["_source"]
@@ -242,13 +234,12 @@ def lastest_file(directory):
 
 def links_to(target):
     """return list of links to an archive target."""
-    query = {"sort" : [{ "path.keyword": "asc" }],
-             "query": {"bool": {"must": [
+    sort = [{ "path.keyword": "asc" }]
+    query = {"bool": {"must": [
                    {"term": {"target": {"value": target}}},
                    {"term": {"type": {"value": "link"}}}],
-                       "must_not": [{"exists": {"field": "removed" }}]}},
-            "size": 10000}
-    result = es.search(index=indexname, body=query, request_timeout=900)
+                       "must_not": [{"exists": {"field": "removed" }}]}}
+    result = es.search(index=indexname, query=query, size=10000, sort=sort, request_timeout=900)
 
     links = []
     for r in result["hits"]["hits"]:
@@ -282,8 +273,8 @@ def get_random_records(path, number, **kwargs):
     # print(json.dumps(query, indent=4))
     query["random_score"] = {}
     query["boost_mode"] = "replace"
-    query = {"query": {"function_score": query}, "size": number}
-    results = es.search(index=indexname, body=query, request_timeout=900)
+    query = {"function_score": query}
+    results = es.search(index=indexname, query=query, size=number, request_timeout=900)
     recs = []
     for r in results["hits"]["hits"]:
         recs.append(r["_source"])
@@ -306,15 +297,13 @@ def archive_summary(path, max_types=5, max_vars=1000, max_exts=10,
                     include_removed=False, **kwargs):
     """find summary info for the archive below a path."""
     query = all_under_query(path, include_removed=include_removed, **kwargs)
-
-    query["size"] = 0
-    query["aggs"] = {"size_stats":{"stats":{"field":"size"}},
-                      "types": {"terms": {"field": "type", "size": max_types}},
-                      "exts": {"terms": {"field": "ext", "size": max_exts}},
-                      "vars": {"terms": {"field": "phenomena.best_name.keyword", "size": max_vars}}}
+    aggs = {"size_stats":{"stats":{"field":"size"}},
+            "types": {"terms": {"field": "type", "size": max_types}},
+            "exts": {"terms": {"field": "ext", "size": max_exts}},
+            "vars": {"terms": {"field": "phenomena.best_name.keyword", "size": max_vars}}}
 
     # print(json.dumps(query, indent=4))
-    result = es.search(index=indexname, body=query, request_timeout=900)
+    result = es.search(index=indexname, query=query, size=0, aggs=aggs, request_timeout=900)
     aggs = result["aggregations"]
     ret = {"size_stats": aggs["size_stats"]}
 
@@ -323,7 +312,6 @@ def archive_summary(path, max_types=5, max_vars=1000, max_exts=10,
         for bucket in aggs[agg_name]["buckets"]:
             agg_list.append((bucket["key"], bucket["doc_count"]))
         ret[agg_name] = agg_list
-
     return ret
 
 
@@ -416,12 +404,12 @@ def insert_item(record):
         es.delete(index=indexname, id=record_id)
     except elasticsearch.exceptions.NotFoundError:
         pass 
-    es.index(index=indexname, id=record_id, body=record, request_timeout=100)    
+    es.index(index=indexname, id=record_id, document=record, request_timeout=100)    
 
 def update_item(record):
     """Update a single document - overwrite feilds in record suplied."""
     document = {'doc': record, 'doc_as_upsert': True}
-    es.update(index=indexname, id=_create_id(record["path"]), body=document, request_timeout=100)
+    es.update(index=indexname, id=_create_id(record["path"]), doc=document, request_timeout=100)
 
 def flag_removed(record):
     """Mark a file as removed by adding a removed date."""
@@ -430,7 +418,7 @@ def flag_removed(record):
         return
     fbi_rec["removed"] = record["last_modified"]
     document = {'doc': fbi_rec, 'doc_as_upsert': True}
-    es.update(index=indexname, id=_create_id(record["path"]), body=document)
+    es.update(index=indexname, id=_create_id(record["path"]), doc=document)
 
 def get_record(path):
     try: 
@@ -463,8 +451,8 @@ def get_records_by_content(md5, filename=None, under=None, include_removed=False
     if filename is not None:
         must.append({"term": {"name.keyword": { "value": filename}}})
 
-    query = {"query": {"bool": {"must": must, "must_not": must_not}}}
-    results = es.search(index=indexname, body=query, request_timeout=90)
+    query = {"bool": {"must": must, "must_not": must_not}}
+    results = es.search(index=indexname, query=query, request_timeout=90)
     records = []
     for r in results["hits"]["hits"]:
         records.append(r["_source"])
@@ -474,6 +462,8 @@ def _create_id(path):
     return hashlib.sha1(path.encode()).hexdigest()
 
 def bulk_update(records):
+    raise DeprecationWarning("Do not use bulk_update")
+    raise Exception("Stop for now")
     """Update a list of records"""
     body = ''
     for record in records:
@@ -481,7 +471,8 @@ def bulk_update(records):
         body += json.dumps({"doc": record, "doc_as_upsert": True}) + "\n"
         #add_item(record)
     print(body)
-    print(es.bulk(index=indexname, body=body, refresh=True))
+    bulk(es, body)
+
 
 def update_file_location(path_list, location): 
     """Mark list of paths as on media type. This is for the NLA system to update media
@@ -506,14 +497,13 @@ def nla_dirs(after="/", stop="/~", fetch_size=10000):
     n = 0
     current_stop = stop
     while True:
-        query = {"sort" : [{ "path.keyword": "asc" }],
-                 "query": {"bool": {"must": [
+        sort = [{ "path.keyword": "asc" }]
+        query = {"bool": {"must": [
                     {"range": {"path.keyword": {"gt": after, "lte": current_stop}}},
                     {"term": {"name.keyword": {"value": "00FILES_ON_TAPE"}}}
-                 ]}},
-                "size": fetch_size}
+                 ]}}
 
-        result = es.search(index=indexname, body=query, request_timeout=900)
+        result = es.search(index=indexname, query=query, sort=sort, size=fetch_size, request_timeout=900)
         nfound = len(result["hits"]["hits"])
         n += nfound
 
@@ -545,8 +535,7 @@ def parameters(directory, removed=False, hidden=False):
             }}
  
     query = {"bool": {"must": must, "must_not": must_not}}
-    body = {"query": query, "aggs": aggs, "size": 0}
-    result = es.search(index=indexname, body=body, request_timeout=900)
+    result = es.search(index=indexname, query=query, aggs=aggs, size=0, request_timeout=900)
 
     parameter_aggs = result["aggregations"]["parameters"]
 
