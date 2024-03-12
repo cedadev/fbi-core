@@ -6,14 +6,13 @@ import os
 import hashlib
 import json
 import re
-from .conf import APIKEY
+from .conf import APIKEY, indexname
 
 if APIKEY:
     es = CEDAElasticsearchClient(headers={'x-api-key': APIKEY})
 else:
     es = CEDAElasticsearchClient()
-    
-indexname = "fbi-2022"
+
 
 def fbi_records(after="/", stop="~", fetch_size=10000, exclude_phenomena=False, item_type=None, **kwargs):
     """
