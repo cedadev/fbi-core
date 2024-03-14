@@ -115,6 +115,7 @@ def all_under_query(path, location=None, name_regex=None,
                     since=None, before=None, 
                     audited_since=None, audited_before=None, 
                     corrupt_since=None, corrupt_before=None, 
+                    regex_date_since=None, regex_date_before=None, 
                     with_field=None, without=None, blank=None, 
                     maxsize=None, minsize=None, 
                     fileset=None,
@@ -199,6 +200,12 @@ def all_under_query(path, location=None, name_regex=None,
 
     if corrupt_before is not None:
         must.append({"range": {"corrupted": {"lte": corrupt_before}}})
+
+    if regex_date_since is not None:
+        must.append({"range": {"regex_date": {"gte": regex_date_since}}})
+
+    if regex_date_before is not None:
+        must.append({"range": {"regex_date": {"lte": regex_date_before}}})
 
     if after and stop:
         must.append({"range": {"path.keyword": {"gt": after, "lte": stop}}})
@@ -298,12 +305,17 @@ def archive_summary(path, max_types=5, max_vars=1000, max_exts=10,
     aggs = {"size_stats":{"stats":{"field":"size"}},
             "types": {"terms": {"field": "type", "size": max_types}},
             "exts": {"terms": {"field": "ext", "size": max_exts}},
-            "vars": {"terms": {"field": "phenomena.best_name.keyword", "size": max_vars}}}
+            "vars": {"terms": {"field": "phenomena.best_name.keyword", "size": max_vars}},
+            "dates": {"stats":{"field":"regex_date"}}}
 
     # print(json.dumps(query, indent=4))
     result = es.search(index=indexname, query=query, size=0, aggs=aggs, request_timeout=900)
     aggs = result["aggregations"]
     ret = {"size_stats": aggs["size_stats"]}
+    if "min_as_string" in aggs["dates"]:
+        ret["regex_date_range"] = (aggs["dates"]["min_as_string"], aggs["dates"]["max_as_string"])
+    else:
+        ret["regex_date_range"] = None
 
     for agg_name in ("types", "exts", "vars"):
         agg_list = []
