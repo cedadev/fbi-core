@@ -222,34 +222,34 @@ def all_under_query(path, location=None, name_regex=None,
 
     return {"bool": {"must": must, "must_not": must_not }}  
 
-def lastest_file(directory):
+def lastest_file(directory, **kwargs):
     """latest file record of last updated file under a path.
     
     :param str directory: path to search for last updated file
     :return dict or None: Record for the last updated file.
     """
-    return top_file(directory, "last_modified")
+    return top_file(directory, "last_modified", **kwargs)
 
 # miss spelt
 latest_file = lastest_file
 
-def first_file(directory):
+def first_file(directory, **kwargs):
     """First file record in ES order of logical path under a path.
     
     :param str directory: path to search.
     :return dict or None: File Record. 
     """
-    return top_file(directory, "path.keyword", order="asc")
+    return top_file(directory, "path.keyword", order="asc", **kwargs)
 
-def last_file(directory):
+def last_file(directory, **kwargs):
     """Last file record in ES order of logical path under a path.
     
     :param str directory: path to search.
     :return dict or None: File Record. 
     """
-    return top_file(directory, "path.keyword")
+    return top_file(directory, "path.keyword", **kwargs)
 
-def top_file(directory, order_by, order="desc"):
+def top_file(directory, order_by, order="desc", **kwargs):
     """First file record in ES order of logical path under a path.
     
     :param str directory: path to search.
@@ -257,7 +257,7 @@ def top_file(directory, order_by, order="desc"):
     :param str directory: 
     :return dict or None: Record for the first file.
     """
-    query = all_under_query(directory, item_type="file")
+    query = all_under_query(directory, item_type="file", **kwargs)
     sort = [{order_by: {"order": order}}]
     result = es.search(index=indexname, query=query, sort=sort, size=1, request_timeout=900)
     if len(result["hits"]["hits"]) == 0:
