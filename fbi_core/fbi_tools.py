@@ -228,16 +228,48 @@ def lastest_file(directory):
     :param str directory: path to search for last updated file
     :return dict or None: Record for the last updated file.
     """
+    return top_file(directory, "last_modified")
+
+# miss spelt
+latest_file = lastest_file
+
+def first_file(directory):
+    """First file record in ES order of logical path under a path.
+    
+    :param str directory: path to search.
+    :return dict or None: File Record. 
+    """
+    return top_file(directory, "path.keyword", order="asc")
+
+def last_file(directory):
+    """Last file record in ES order of logical path under a path.
+    
+    :param str directory: path to search.
+    :return dict or None: File Record. 
+    """
+    return top_file(directory, "path.keyword")
+
+def top_file(directory, order_by, order="desc"):
+    """First file record in ES order of logical path under a path.
+    
+    :param str directory: path to search.
+    :param str order_by: attribute to order on.
+    :param str directory: 
+    :return dict or None: Record for the first file.
+    """
     query = all_under_query(directory, item_type="file")
-    sort = [{"last_modified": {"order": "desc"}}]
+    sort = [{order_by: {"order": order}}]
     result = es.search(index=indexname, query=query, sort=sort, size=1, request_timeout=900)
     if len(result["hits"]["hits"]) == 0:
         return None
     last_record = result["hits"]["hits"][0]["_source"]
-    if "last_modified" in last_record:
+
+    order_by = order_by.replace(".keyword", "")
+    if order_by in last_record:
         return last_record
     else:
         return None
+
 
 def links_to(target):
     """return list of links to an archive target."""
@@ -489,7 +521,7 @@ def update_file_location(path_list, location):
 
     :param list pathlist: A list of paths to mark up.
     :param str location: "on_disk", "on_tape" or "on_obstore"."""
-    assert location in ("on_disk", "on_tape", "on_obstore")
+    assert location in ("on_disk", "on_tape", "on_obstore", "on_cache")
 
     for path in path_list:
         rec = get_record(path)
