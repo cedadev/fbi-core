@@ -28,6 +28,8 @@ class FilterCommand(click.Command):
             click.core.Option(("--audited-before",), type=click.DateTime(), help="only pick files audited before a date"),
             click.core.Option(("--corrupt-since",), type=click.DateTime(), help="only pick files corrupted since a date"),
             click.core.Option(("--corrupt-before",), type=click.DateTime(), help="only pick files corrupted before a date"),
+            click.core.Option(("--regex-date-since",), type=click.DateTime(), help="only pick files with regex date since a date"),
+            click.core.Option(("--regex-date-before",), type=click.DateTime(), help="only pick files with regex date before a date"),
             click.core.Option(("--name_regex",), metavar="REGEX", help="Only pick files that match a regex."),
             click.core.Option(("--without",), metavar="FIELD", help="Only pick files without this field in the record."),
             click.core.Option(("--blank",), metavar="FIELD", help="Only pick files where this field is an empty string."),
@@ -123,7 +125,7 @@ def agg_info(path, maxtypes=3, **kwargs):
 
     item_types = {"file":0, "link":0, "dir":0}
     item_types.update(dict(info["types"]))
-    return info["size_stats"], item_types, exts
+    return info["size_stats"], item_types, exts, info["regex_date_range"]
 
 
 @click.command(cls=FilterCommand, context_settings=CONTEXT_SETTINGS)
@@ -131,20 +133,23 @@ def agg_info(path, maxtypes=3, **kwargs):
 @click.option("--maxtypes", help="Max number of common types to display.", default=3)
 def summary(paths, maxtypes, **kwargs):
     table = []
-    headers = ["Path", "Files", "Dirs", "links", "Size", "Min", "Max", "Avg", "exts"]
+    headers = ["Path", "Files", "Dirs", "links", "Size", "Min", "Max", "Avg", "Regex dates", "exts"]
     total_files = 0
     total_dirs = 0
     total_links = 0
     total_size = 0
     for path in paths:
-        size_stats, item_types, exts = agg_info(path, maxtypes=maxtypes, **kwargs)
-
+        size_stats, item_types, exts, dates = agg_info(path, maxtypes=maxtypes, **kwargs)
+        if dates is None:
+            date_range = ""
+        else:
+            date_range = f"{dates[0][:10]} - {dates[1][:10]}"
         ext_str = ", ".join(map(lambda x: f"{x[0]}: {x[1]}" , exts.items()))
         if item_types['file'] + item_types['dir'] + item_types['link'] > 0:
             table.append([path, item_types['file'], item_types['dir'],item_types['link'],
                           sizeof_fmt(size_stats["sum"]),
                           sizeof_fmt(size_stats["min"]), sizeof_fmt(size_stats["max"]), 
-                          sizeof_fmt(size_stats["avg"]), ext_str])
+                          sizeof_fmt(size_stats["avg"]), date_range, ext_str])
         total_files += item_types['file']
         total_dirs += item_types['dir']
         total_links += item_types['link']
