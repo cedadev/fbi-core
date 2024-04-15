@@ -66,7 +66,7 @@ def ls(paths, record, **kwargs):
     for path in paths:
         for f in fbi_records_under(path,  **kwargs):
             if record:
-                print(json.dump(f))
+                print(json.dumps(f))
             else:
                 print(f["path"])
 
