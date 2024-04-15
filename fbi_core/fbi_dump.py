@@ -139,7 +139,6 @@ def dump(batch):
             fh.write(json.dumps(record) + "\n")
 
 
-
 class FBIBatchRun:
 
     def __init__(self, dir_name, function_name=None, parallel_processes=4, batch_size=1000000, batch_state_save_frequency=1000, **kwargs):

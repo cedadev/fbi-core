@@ -135,6 +135,8 @@ def all_under_query(path, location=None, name_regex=None,
     :param str audited_before: Search for items audited before this iso formated datetime. 
     :param str corrupt_since: Search for items corrupt since this iso formated datetime. 
     :param str corrupt_before: Search for items corrupt before this iso formated datetime. 
+    :param str regex_date_since: Search for items with regex date since this iso formated datetime. 
+    :param str regex_date_before: Search for items with regex date before this iso formated datetime. 
     :param str with_field: Search for items where this field exists.
     :param str without: Search for items where this field does not exist.
     :param str blank: Search for items where this field is an empty string.
@@ -338,7 +340,8 @@ def archive_summary(path, max_types=5, max_vars=1000, max_exts=10,
             "types": {"terms": {"field": "type", "size": max_types}},
             "exts": {"terms": {"field": "ext", "size": max_exts}},
             "vars": {"terms": {"field": "phenomena.best_name.keyword", "size": max_vars}},
-            "dates": {"stats":{"field":"regex_date"}}}
+            "dates": {"stats":{"field":"regex_date"}},
+            "moddates": {"stats":{"field":"last_modified"}}}
 
     # print(json.dumps(query, indent=4))
     result = es.search(index=indexname, query=query, size=0, aggs=aggs, request_timeout=900)
@@ -348,6 +351,10 @@ def archive_summary(path, max_types=5, max_vars=1000, max_exts=10,
         ret["regex_date_range"] = (aggs["dates"]["min_as_string"], aggs["dates"]["max_as_string"])
     else:
         ret["regex_date_range"] = None
+    if "min_as_string" in aggs["moddates"]:
+        ret["mod_date_range"] = (aggs["moddates"]["min_as_string"], aggs["moddates"]["max_as_string"])
+    else:
+        ret["mod_date_range"] = None
 
     for agg_name in ("types", "exts", "vars"):
         agg_list = []

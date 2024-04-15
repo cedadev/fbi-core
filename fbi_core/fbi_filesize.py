@@ -61,10 +61,14 @@ def ls2(paths, **kwargs):
 
 @click.command(cls=FilterCommand)
 @click.argument("paths", nargs=-1)
-def ls(paths, **kwargs):
+@click.option("-r", "--record", help="Print the json record", is_flag=True)
+def ls(paths, record, **kwargs):
     for path in paths:
         for f in fbi_records_under(path,  **kwargs):
-            print(f["path"])
+            if record:
+                print(json.dump(f))
+            else:
+                print(f["path"])
 
 @click.command(cls=FilterCommand)
 @click.argument("paths", nargs=-1)
