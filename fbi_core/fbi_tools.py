@@ -82,6 +82,8 @@ def fbi_records_under(path="/", fetch_size=10000, exclude_phenomena=False, **kwa
             current_scope_depth = len(current_scope.split("/"))
             current_scope = "/".join(lastpath.split("/")[:current_scope_depth+1])
         query = all_under_query(current_scope, **kwargs)
+        query["sort"] = [{ "path.keyword": "asc" }]
+        query["size"] = fetch_size
         n += nfound
         if len(result["hits"]["hits"]) > 0:
             search_after = result["hits"]["hits"][-1]["sort"]
