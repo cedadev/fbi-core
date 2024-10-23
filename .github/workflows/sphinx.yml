@@ -20,7 +20,7 @@ jobs:
         docs-folder: "docs/"
         pre-build-command: "sudo apt-get -y install git"
     - name: Upload artifacts
-      uses: actions/upload-artifact@v1
+      uses: actions/upload-artifact@v4
       with:
         name: html-docs
         path: docs/build/html/
