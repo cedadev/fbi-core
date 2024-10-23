@@ -66,9 +66,10 @@ def fbi_records_under(path="/", fetch_size=10000, exclude_phenomena=False, **kwa
         query["_source"] = {"exclude": ["phenomena"]}
     query["sort"] = [{ "path.keyword": "asc" }]
     query["size"] = fetch_size
-
+    query["search_after"] = search_after
+    
     while True:
-        result = es.search(index=indexname, body=query, request_timeout=900, search_after=search_after)
+        result = es.search(index=indexname, body=query, request_timeout=900)
         nfound = len(result["hits"]["hits"])
         if nfound == 0 and current_scope == path:
             break
@@ -82,10 +83,11 @@ def fbi_records_under(path="/", fetch_size=10000, exclude_phenomena=False, **kwa
             current_scope = "/".join(lastpath.split("/")[:current_scope_depth+1])
         query = all_under_query(current_scope, **kwargs)
         query["sort"] = [{ "path.keyword": "asc" }]
-        query["size"] = fetch_size    
+        query["size"] = fetch_size
         n += nfound
         if len(result["hits"]["hits"]) > 0:
             search_after = result["hits"]["hits"][-1]["sort"]
+        query["search_after"] = search_after
 
         for record in result["hits"]["hits"]:
             yield record["_source"]
