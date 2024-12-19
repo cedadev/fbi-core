@@ -5,6 +5,7 @@ import sys
 import os
 import tabulate
 import colorama
+import hashlib
 from .format_utils import sizeof_fmt
 from .fbi_tools import get_record, archive_summary, ls_query, parameters, lastest_file, convert2datetime, get_random,  links_to, fbi_records, fbi_records_under, get_records_by_content, splits
 import time
@@ -75,8 +76,23 @@ def md5sum(paths, **kwargs):
                 print(f'{f["md5"]} {f["path"]}')
 
 
+def make_md5(path):
+    """Make an MD5 from file"""
+    md5 = hashlib.md5()
+    with open(path, "br") as F:
+        while 1:
+            try:
+                buf = F.read(1024 * 1024)
+            except IOError:
+                return
+            md5.update(buf)
+            if not buf:
+                break
+    return md5.hexdigest()
+
+
 @click.command()
-@click.option("-l", '--filelist', help='file listing. Defaults to sdtin', type=click.File('r'), default=sys.stdin)
+@click.option("-l", '--filelist', help='file listing. Defaults to sdtin. The file should be in the md5sum output format "<MD5> <PATH>" or simply <PATH>.', type=click.File('r'), default=sys.stdin)
 @click.option("--limit-path", help="Limit the search to files under this path")
 @click.option("-r", "--include-removed", help="Include files that have been removed from the archive.", is_flag=True)
 @click.option("-m", "--match-filename", help="Only match if the filename in the archive is the same.", is_flag=True)
@@ -87,7 +103,12 @@ def check_archive_by_checksum(filelist, limit_path, include_removed, match_filen
     unmatched = 0
     duplicates = []
     for line in filelist:
-        md5, path = line.strip().split()
+        bits = line.strip().split()
+        if len(bits) == 2: 
+            md5, path = bits
+        elif len(bits) == 1:
+            path = bits[0]
+            md5 = make_md5(path)
         if match_filename:
             filename = os.path.basename(path)
         else:
