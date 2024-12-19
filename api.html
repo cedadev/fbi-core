@@ -104,8 +104,10 @@
 <li><p><strong>after</strong> (<em>str</em>) – paths after this are iterated over. Defaults to “/”</p></li>
 <li><p><strong>stop</strong> (<em>str</em>) – iteration stops when the path is greater than or equal to this. Defaults to “~”</p></li>
 <li><p><strong>fetch_size</strong> (<em>int</em>) – The number of records to request from elasticsearch at a time.</p></li>
-<li><p><strong>exclude_phenomena</strong> (<em>bool</em>) – remove the bulky phenomena attribute from the record. Default is False.</p></li>
-<li><p><strong>item_type</strong> (<em>str</em>) – Item type for the records. Either “file”, “dir” or “link”. Defaults to all types.</p></li>
+<li><p><strong>exclude_phenomena</strong> (<em>bool</em>) – remove the bulky phenomena attribute from 
+the record. Default is False.</p></li>
+<li><p><strong>item_type</strong> (<em>str</em>) – Item type for the records. Either “file”, “dir” or “link”. 
+Defaults to all types.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return iterator[dict]<span class="colon">:</span></dt>
@@ -129,7 +131,7 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="fbi_core.get_records_by_content">
 <span class="sig-prename descclassname"><span class="pre">fbi_core.</span></span><span class="sig-name descname"><span class="pre">get_records_by_content</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">md5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">under</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_removed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fbi_core.get_records_by_content" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get records with content that matches an md5. 
+<dd><p>Get records with content that matches an md5.
 Optionaly make it match a filename and a parent directory.</p>
 </dd></dl>
 
