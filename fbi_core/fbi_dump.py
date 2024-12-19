@@ -1,20 +1,34 @@
-import threading
-from queue import Queue
-import click
-from .fbi_tools import es, indexname, fbi_records_under, splits
+import importlib
 import json
 import os
-import zipfile
-import tabulate
-import time
-from typing import NamedTuple
-from collections import namedtuple
-from .fbi_filesize import FilterCommand, CONTEXT_SETTINGS
 import signal
-import importlib
 import subprocess
+import threading
+import time
+import zipfile
+from collections import namedtuple
+from queue import Queue
+from typing import NamedTuple
 
-FBIBatchState = namedtuple('FBIBatchState', ['number', 'after', 'stop', "start_count", 'current', 'summary', 'number_processed', "processing_pid"])
+import click
+import tabulate
+
+from .fbi_filesize import CONTEXT_SETTINGS, FilterCommand
+from .fbi_tools import es, fbi_records_under, indexname, splits
+
+FBIBatchState = namedtuple(
+    "FBIBatchState",
+    [
+        "number",
+        "after",
+        "stop",
+        "start_count",
+        "current",
+        "summary",
+        "number_processed",
+        "processing_pid",
+    ],
+)
 
 
 def process_exists(pid):
@@ -72,7 +86,7 @@ class FBIBatch:
         self.summary = state["summary"]
         self.number_processed = state["number_processed"]
         self.processing_pid = state["processing_pid"]
-        self.is_setup = True     
+        self.is_setup = True
 
     def save(self):
         assert self.is_setup, "Can't save batch until setup."
@@ -85,14 +99,14 @@ class FBIBatch:
                 "current": self.current,
                 "summary": self.summary,
                 "number_processed": self.number_processed,
-                "processing_pid": self.processing_pid
+                "processing_pid": self.processing_pid,
             }
             json.dump(state, f, indent=4)
         os.rename(tmp_file, self.batch_savefile)
 
     def is_complete(self):
         return self.current and self.stop and self.current >= self.stop
-    
+
     def is_running(self):
         return self.processing_pid and process_exists(self.processing_pid)
 
@@ -108,10 +122,19 @@ class FBIBatch:
 
     def set_summary(self, summary):
         s = self.state
-        self.state = FBIBatchState(s.number, s.after, s.stop, s.start_count, s.current, summary, s.number_processed, s.processing_pid)
+        self.state = FBIBatchState(
+            s.number,
+            s.after,
+            s.stop,
+            s.start_count,
+            s.current,
+            summary,
+            s.number_processed,
+            s.processing_pid,
+        )
 
     def records(self):
-        # Fetch records from Elasticsearch and add them to the queue 
+        # Fetch records from Elasticsearch and add them to the queue
         self.processing_pid = os.getpid()
         self.save()
         query_args = self.run.base_query.copy()
@@ -120,31 +143,39 @@ class FBIBatch:
         for record in fbi_records_under("/", **query_args):
             self.current = record["path"]
             self.number_processed += 1
-            if self.number_processed % self.run.batch_state_save_frequency == 0: 
+            if self.number_processed % self.run.batch_state_save_frequency == 0:
                 self.save()
             yield record
         self.current = self.stop
         self.processing_pid = None
         self.save()
 
+
 def dump(batch):
-    # Fetch records from Elasticsearch and add them to the queue 
+    # Fetch records from Elasticsearch and add them to the queue
     label = batch.after.strip("/").replace("/", "_")
     label = batch.batch_number
     output_dir = "./output"
     os.makedirs(output_dir, exist_ok=True)
     output_file = f"{output_dir}/{label}.jsonl"
-    with open(output_file, 'a') as fh:
+    with open(output_file, "a") as fh:
         for record in batch.records():
             fh.write(json.dumps(record) + "\n")
 
 
-
 class FBIBatchRun:
 
-    def __init__(self, dir_name, function_name=None, parallel_processes=4, batch_size=1000000, batch_state_save_frequency=1000, **kwargs):
+    def __init__(
+        self,
+        dir_name,
+        function_name=None,
+        parallel_processes=4,
+        batch_size=1000000,
+        batch_state_save_frequency=1000,
+        **kwargs,
+    ):
         self.dir_name = dir_name
-        self.parallel_processes=parallel_processes
+        self.parallel_processes = parallel_processes
         self.batch_state_save_frequency = batch_state_save_frequency
         self.base_query = kwargs
         self.batch_size = batch_size
@@ -155,7 +186,7 @@ class FBIBatchRun:
             self.active = False
             self.active_run_pid = None
             self.load()
-        else: 
+        else:
             self.active = True
             self.active_run_pid = os.getpid()
             self.save()
@@ -178,7 +209,7 @@ class FBIBatchRun:
 
         if process_exists(self.active_run_pid):
             self.active = False
-        else: 
+        else:
             self.active = True
             self.active_run_pid = os.getpid()
             self.save()
@@ -189,13 +220,19 @@ class FBIBatchRun:
             return
         os.makedirs(self.dir_name, exist_ok=True)
         with open(self.statefile, "w") as f:
-            json.dump({"batch_size": self.batch_size, 
-                       "base_query": self.base_query, 
-                       "parallel_processes": self.parallel_processes,
-                       "batch_state_save_frequency": self.batch_state_save_frequency,
-                       "active_run_pid": self.active_run_pid,
-                       "function_name": self.function_name,
-                       "number_of_batchs": self.number_of_batchs}, f, indent=4)
+            json.dump(
+                {
+                    "batch_size": self.batch_size,
+                    "base_query": self.base_query,
+                    "parallel_processes": self.parallel_processes,
+                    "batch_state_save_frequency": self.batch_state_save_frequency,
+                    "active_run_pid": self.active_run_pid,
+                    "function_name": self.function_name,
+                    "number_of_batchs": self.number_of_batchs,
+                },
+                f,
+                indent=4,
+            )
 
     @property
     def n_batches(self):
@@ -228,9 +265,9 @@ class FBIBatchRun:
             print(i, b, after, stop, count)
             batch = FBIBatch(self, i)
             batch.setup(after, stop, count)
-            batch.save() 
-        self.number_of_batchs = len(batches)        
-        self.save() 
+            batch.save()
+        self.number_of_batchs = len(batches)
+        self.save()
 
     def is_complete(self):
         for b in self.batches:
@@ -247,17 +284,37 @@ class FBIBatchRun:
         grand_batch = 0
         for b in self.batches:
             b.load()
-            start_count = max(b.start_count, 1) 
+            start_count = max(b.start_count, 1)
             grand_batch += b.start_count
             grand_total += b.number_processed
             total = b.number_processed
             percent = 100 * total / start_count
             done = ""
-            if b.is_running(): done = "Running"
-            if b.is_complete(): done += " Complete"
-            table.append([b.batch_number, b.after, done, f'{percent:5.1f}', f"{total}", f"{start_count}"])
+            if b.is_running():
+                done = "Running"
+            if b.is_complete():
+                done += " Complete"
+            table.append(
+                [
+                    b.batch_number,
+                    b.after,
+                    done,
+                    f"{percent:5.1f}",
+                    f"{total}",
+                    f"{start_count}",
+                ]
+            )
         grand_percent = 100 * grand_total / grand_batch
-        table.append(["", "***** Total / -> /~", "", f'{grand_percent:5.1f}', f"{grand_total}", f"{grand_batch}"])
+        table.append(
+            [
+                "",
+                "***** Total / -> /~",
+                "",
+                f"{grand_percent:5.1f}",
+                f"{grand_total}",
+                f"{grand_batch}",
+            ]
+        )
         print(tabulate.tabulate(table, header))
 
     def batch_savefile(self, n):
@@ -269,38 +326,66 @@ class FBIBatchRun:
             number_to_start = self.parallel_processes
             for batch in self.batches:
                 batch.load()
-                if not batch.is_running() and not batch.is_complete() and number_to_start > 0:
+                if (
+                    not batch.is_running()
+                    and not batch.is_complete()
+                    and number_to_start > 0
+                ):
                     number_to_start -= 1
-                    subprocess.Popen(["fbi_batch_run", self.dir_name, str(batch.batch_number)])
-                    
+                    subprocess.Popen(
+                        ["fbi_batch_run", self.dir_name, str(batch.batch_number)]
+                    )
+
                     print(f"+++ Starting batch {batch.batch_number}")
                 time.sleep(0.02)
-                
+
             if self.is_complete():
                 print("Break as complete")
                 break
-            time.sleep(5)        
+            time.sleep(5)
 
 
 @click.command(cls=FilterCommand, context_settings=CONTEXT_SETTINGS)
-@click.argument('run_name')
-@click.argument('function_name')
-@click.option('--parallel-processes', default=4, help='Number of concurent batches to run')
-@click.option('--records-per-batch', default=100000, help='Number of records to process per batch')
-@click.option('--batch-state-save-frequency', default=1000, help='Number of records to process before saving the batch state.')
-@click.option('--path', help='Root path to dump', default="/")
+@click.argument("run_name")
+@click.argument("function_name")
+@click.option(
+    "--parallel-processes", default=4, help="Number of concurent batches to run"
+)
+@click.option(
+    "--records-per-batch", default=100000, help="Number of records to process per batch"
+)
+@click.option(
+    "--batch-state-save-frequency",
+    default=1000,
+    help="Number of records to process before saving the batch state.",
+)
+@click.option("--path", help="Root path to dump", default="/")
 @click.option("--setup-only", help="Do not start the launcher", is_flag=True)
-def setup_run(run_name, function_name, parallel_processes, records_per_batch, batch_state_save_frequency, path, setup_only, **kwargs):
+def setup_run(
+    run_name,
+    function_name,
+    parallel_processes,
+    records_per_batch,
+    batch_state_save_frequency,
+    path,
+    setup_only,
+    **kwargs,
+):
     print()
     print(function_name, "***")
-    run = FBIBatchRun(run_name, function_name, parallel_processes=parallel_processes, batch_state_save_frequency=batch_state_save_frequency)
-    run.make_new_batches(path, batch_size=records_per_batch, **kwargs) 
+    run = FBIBatchRun(
+        run_name,
+        function_name,
+        parallel_processes=parallel_processes,
+        batch_state_save_frequency=batch_state_save_frequency,
+    )
+    run.make_new_batches(path, batch_size=records_per_batch, **kwargs)
     if not setup_only:
         os.system(f"fbi_launch_run {run.dir_name} &")
 
 
 @click.command()
-@click.argument('run_name')
+@click.argument("run_name")
 @click.option("--kill", help="Kill all batch processes and the launcher", is_flag=True)
 @click.option("-i", "--inspect", help="Just look at run info.", is_flag=True)
 def launch_run(run_name, kill, inspect):
@@ -316,14 +401,15 @@ def launch_run(run_name, kill, inspect):
     else:
         print("Start processing")
         run.process()
-    
+
+
 @click.command()
-@click.argument('run_name')
-@click.argument('batch_number', type=int)
+@click.argument("run_name")
+@click.argument("batch_number", type=int)
 def batch_run(run_name, batch_number):
     run = FBIBatchRun(run_name)
-    batch =  FBIBatch(run, batch_number)
-    if not batch.is_running(): 
+    batch = FBIBatch(run, batch_number)
+    if not batch.is_running():
         run.func(batch)
     else:
         print("Tried to start batch that was already running.")
