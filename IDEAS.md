@@ -109,3 +109,42 @@ while not selected:
     This is a good selection  
     selected == C < T and C > kT or reached the end
 
+
+# An FBI API
+
+function that give a list of records:
+
+fbi_records
+fbi_records_under
+where_is
+ls_query
+all_under_query
+links_to
+get_random_records
+fbi_listdir
+def get_records_by_content
+nla_dirs
+
+stats of records:
+count
+lastest_file
+last_updated
+archive_summary
+parameters
+
+utils:
+convert2datetime
+splits
+_create_id
+
+Write records:
+make_dirs
+insert_item
+update_item
+flag_removed
+bulk_update
+update_file_location
+
+Get single record:
+get_record, get_record_attr
+
