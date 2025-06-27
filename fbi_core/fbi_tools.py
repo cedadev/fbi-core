@@ -214,6 +214,9 @@ def all_under_query(
     
     if exclude_readmes:
         must_not.append({"prefix": {"name.keyword": {"value": "00README"}}})
+        must_not.append({"prefix": {"name.keyword": {"value": "README"}}})
+        must_not.append({"prefix": {"name.keyword": {"value": "readme"}}})
+        must_not.append({"prefix": {"name.keyword": {"value": "."}}})
 
     # must_not.append({"term": {"name.keyword": {"value": ".ftpaccess" }}})
     # must_not.append({"term": {"name.keyword": {"value": "00README_catalogue_and_licence.txt" }}})
