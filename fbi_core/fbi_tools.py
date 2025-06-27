@@ -278,9 +278,6 @@ def all_under_query(
     if fileset is not None:
         must.append({"term": {"fileset": fileset}})
 
-    print(must)
-    print(must_not)
-
     return {"query": {"bool": {"must": must, "must_not": must_not}}}
 
 
@@ -298,7 +295,7 @@ def lastest_file(directory, **kwargs):
     if len(result["hits"]["hits"]) == 0:
         return None
     last_record = result["hits"]["hits"][0]["_source"]
-    print(last_record)
+
     if "last_modified" in last_record:
         return last_record
     else:
