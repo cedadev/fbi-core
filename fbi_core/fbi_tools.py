@@ -164,6 +164,7 @@ def all_under_query(
     fileset=None,
     after=None,
     stop=None,
+    exclude_readmes=False,
 ):
     """
     Make elastic search query for FBI records.
@@ -188,6 +189,7 @@ def all_under_query(
     :param str fileset: Search for items in a fileset.
     :param str after: Search items where path is lexically after this.
     :param str stop: Search items where path is lexically before this.
+    :param bool exclude_readmes: Flag to exclude readmes and files that start with a dot.
 
     :return dict: Elasticsearch query which could be used by the elacticsearch client.
     """
@@ -208,6 +210,10 @@ def all_under_query(
         must.append({"exists": {"field": with_field}})
     if blank:
         must.append({"term": {blank: {"value": ""}}})
+
+    
+    if exclude_readmes:
+        must_not.append({"prefix": {"name.keyword": {"value": "00README"}}})
 
     # must_not.append({"term": {"name.keyword": {"value": ".ftpaccess" }}})
     # must_not.append({"term": {"name.keyword": {"value": "00README_catalogue_and_licence.txt" }}})
@@ -269,22 +275,27 @@ def all_under_query(
     if fileset is not None:
         must.append({"term": {"fileset": fileset}})
 
+    print(must)
+    print(must_not)
+
     return {"query": {"bool": {"must": must, "must_not": must_not}}}
 
 
-def lastest_file(directory):
+def lastest_file(directory, **kwargs):
     """latest file record of last updated file under a path.
 
     :param str directory: path to search for last updated file
     :return dict or None: Record for the last updated file.
     """
-    query = all_under_query(directory, item_type="file")
+
+    query = all_under_query(directory, **kwargs)
     query["sort"] = [{"last_modified": {"order": "desc"}}]
     query["size"] = 1
     result = es.search(index=indexname, body=query, request_timeout=900)
     if len(result["hits"]["hits"]) == 0:
         return None
     last_record = result["hits"]["hits"][0]["_source"]
+    print(last_record)
     if "last_modified" in last_record:
         return last_record
     else:
@@ -323,7 +334,7 @@ def convert2datetime(d):
 
 
 def last_updated(directory):
-    lfile = lastest_file(directory)
+    lfile = lastest_file(directory, item_type="file", exclude_readmes=True)
     if lfile is None:
         return None
     return convert2datetime(lfile["last_modified"])

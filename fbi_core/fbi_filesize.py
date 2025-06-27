@@ -38,7 +38,8 @@ class FilterCommand(click.Command):
             click.core.Option(("--fileset",), metavar='FILESET', help="Only pick items in this fileset."),
             click.core.Option(("--include-removed",), is_flag=True, show_default=True, help="inculde removed items."),
             click.core.Option(("--after",), metavar="PATH", help="Records where path is lexically after this."),
-            click.core.Option(("--stop",), metavar="PATH", help="Records where path is lexically before this."),]
+            click.core.Option(("--stop",), metavar="PATH", help="Records where path is lexically before this."),
+            click.core.Option(("--exclude-readmes",), is_flag=True, show_default=True, help="exclude readmes and files that start with a dot.")]
         for o in reversed(options):
             self.params.insert(0, o)
 
@@ -198,13 +199,13 @@ def show_parameters(paths):
         print(json.dumps(parameters(path), indent=4))
    
 
-@click.command()
+@click.command(cls=FilterCommand)
 @click.argument("paths", nargs=-1)
 @click.option("-f", "--filenames", help="Show file names of latest files", is_flag=True)
 @click.option("--record", help="Show complete FBI record of latest files", is_flag=True)
-def show_last_updated(paths, filenames, record):
+def show_last_updated(paths, filenames, record, **kwargs):
     for path in paths:
-        rec = lastest_file(path)
+        rec = lastest_file(path, **kwargs)
         if rec is None:
             print(f"{path}: No file found.")
         else:
