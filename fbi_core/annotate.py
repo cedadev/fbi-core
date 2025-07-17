@@ -8,14 +8,17 @@ import elasticsearch
 import requests
 from ceda_es_client import CEDAElasticsearchClient
 
-from .conf import APIKEY
+from .conf import APIKEY, es_annotation 
 
 if APIKEY:
     es = CEDAElasticsearchClient(headers={"x-api-key": APIKEY})
 else:
     es = CEDAElasticsearchClient()
 
-indexname = "fbi-annotations"
+if es_annotation:
+    indexname = es_annotation
+else:
+    indexname = "fbi-annotations"
 
 
 def get_moles_records():

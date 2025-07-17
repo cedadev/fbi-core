@@ -8,14 +8,17 @@ import elasticsearch
 from ceda_es_client import CEDAElasticsearchClient
 from elasticsearch.helpers import scan
 
-from .conf import APIKEY
+from .conf import APIKEY, es_index
 
 if APIKEY:
     es = CEDAElasticsearchClient(headers={"x-api-key": APIKEY})
 else:
     es = CEDAElasticsearchClient()
 
-indexname = "fbi-2022"
+if es_index:
+    indexname = es_index
+else:
+    indexname = "fbi-2022"
 
 
 def fbi_records(
