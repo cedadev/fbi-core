@@ -4,16 +4,15 @@ import os
 import re
 from datetime import datetime
 
-import elasticsearch
-from ceda_es_client import CEDAElasticsearchClient
+from elasticsearch import Elasticsearch
 from elasticsearch.helpers import scan
 
-from .conf import APIKEY, es_index
+from .conf import APIKEY, es_index, host_es
 
 if APIKEY:
-    es = CEDAElasticsearchClient(headers={"x-api-key": APIKEY})
+    es = Elasticsearch(host_es, headers={"x-api-key": APIKEY})
 else:
-    es = CEDAElasticsearchClient()
+    es = Elasticsearch()
 
 if es_index:
     indexname = es_index

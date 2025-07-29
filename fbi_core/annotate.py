@@ -5,15 +5,15 @@ import re
 from collections import defaultdict
 
 import elasticsearch
+from elasticsearch import Elasticsearch
 import requests
-from ceda_es_client import CEDAElasticsearchClient
 
-from .conf import APIKEY, es_annotation 
+from .conf import APIKEY, es_annotation, host_es
 
 if APIKEY:
-    es = CEDAElasticsearchClient(headers={"x-api-key": APIKEY})
+    es = Elasticsearch(host_es, headers={"x-api-key": APIKEY})
 else:
-    es = CEDAElasticsearchClient()
+    es = Elasticsearch()
 
 if es_annotation:
     indexname = es_annotation

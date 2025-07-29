@@ -1,4 +1,3 @@
-ceda-elasticsearch-client
 tabulate
 click
 pyyaml
