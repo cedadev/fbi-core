@@ -7,7 +7,7 @@ from datetime import datetime
 from elasticsearch import Elasticsearch
 from elasticsearch.helpers import scan
 
-from conf import load_config
+from .conf import load_config
 
 api_key, host_es, es_index, es_annotation = load_config()
 
