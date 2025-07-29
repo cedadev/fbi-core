@@ -42,7 +42,7 @@ setup(
 
     entry_points={
         'console_scripts': [
-            'fbi_conf=fbi_core.conf:load_config'
+            'fbi_conf=fbi_core.conf:load_config',
             'fbi_filesize=fbi_core.fbi_filesize:summary',
             'fbi_ls=fbi_core.fbi_filesize:ls2',
             'fbi_random=fbi_core.fbi_filesize:random_paths',
