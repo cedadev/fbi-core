@@ -4,6 +4,7 @@ import os
 import re
 from datetime import datetime
 
+import elasticsearch
 from elasticsearch import Elasticsearch
 from elasticsearch.helpers import scan
 

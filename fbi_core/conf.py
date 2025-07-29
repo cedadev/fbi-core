@@ -22,6 +22,9 @@ def load_config():
             es_annotation = None
     else:
         api_key = None
+        host_es = None
+        es_index = None
+        es_annotation = None
 
     return api_key, host_es, es_index, es_annotation
 
