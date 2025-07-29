@@ -6,3 +6,4 @@ build
 *.egg-info
 dist
 dump_output
+/home/

@@ -24,7 +24,7 @@ setup(
     author_email='sam.pepler@stfc.ac.uk',
     # Choose your license
     license='BSD',
-    install_requires=['tabulate', 'click', 'pyyaml', 'elasticsearch', 'colorama'],
+    install_requires=['tabulate', 'click', 'pyyaml', 'elasticsearch', 'colorama', 'requests'],
 
     # See https://pypi.python.org/pypi?%3Aaction=list_classifiers
     classifiers=[

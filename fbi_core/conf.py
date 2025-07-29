@@ -1,10 +1,11 @@
 import yaml
 import os
 
-
-conf_file = os.path.join(os.environ["HOME"], ".fbi.yml")
-
 def load_config():
+    try:
+        conf_file = os.path.join(os.environ["HOME"], ".fbi.yml") # for prod in Linux based environment
+    except:
+        conf_file = os.path.join("./home/", ".fbi.yml") # For testing in Windows environment, won't work in Linux/ Mac OS as "HOME" env variable exists. So another solution for debugging would be required.
     if os.path.exists(conf_file):
         conf = yaml.load(open(conf_file), Loader=yaml.Loader)
         api_key = conf["ES"]["api_key"]

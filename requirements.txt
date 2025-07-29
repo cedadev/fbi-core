@@ -3,3 +3,4 @@ click
 pyyaml
 elasticsearch
 colorama
+requests
