@@ -8,10 +8,12 @@ import elasticsearch
 from elasticsearch import Elasticsearch
 import requests
 
-from .conf import APIKEY, es_annotation, host_es
+from .conf import load_config
 
-if APIKEY:
-    es = Elasticsearch(host_es, headers={"x-api-key": APIKEY})
+api_key, host_es, es_index, es_annotation = load_config()
+
+if api_key:
+    es = Elasticsearch(host_es, headers={"x-api-key": api_key})
 else:
     es = Elasticsearch()
 
