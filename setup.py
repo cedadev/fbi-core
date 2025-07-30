@@ -33,7 +33,7 @@ setup(
         'Intended Audience :: Developers',
         # Pick your license as you wish (should match "license" above)
         'License :: OSI Approved :: BSD License',
-        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3.11',
     ],
     keywords='ingest',
     # You can just specify the packages manually here if your project is

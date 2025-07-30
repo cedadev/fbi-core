@@ -1,6 +1,6 @@
 tabulate
 click
 pyyaml
-elasticsearch
+elasticsearch = "8.12.0"
 colorama
 requests
