@@ -1,6 +1,6 @@
 [project]
 name = "fbi-core"
-version = "0.1.0"
+version = "1.3.2"
 description = "File Based Index (FBI) core queries. This module provides functions to interact with the CEDA FBI including read queries and methods to write records. Command line tools to list and summarise the archive are included here. A separate package, fbi-indexing-tools, provides tools to write records to the FBI. Documentation: https://cedadev.github.io/fbi-core/index.html"
 authors = [
     {name = "Sam Pepler <sam.pepler@stfc.ac.uk> Matthew Paice <matthew.paice@stfc.ac.uk>"}
