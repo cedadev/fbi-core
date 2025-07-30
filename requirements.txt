@@ -1,6 +1,0 @@
-tabulate
-click
-pyyaml
-elasticsearch = "8.12.0"
-colorama
-requests
