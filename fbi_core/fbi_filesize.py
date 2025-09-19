@@ -46,18 +46,16 @@ class FilterCommand(click.Command):
 
 @click.command(cls=FilterCommand)
 @click.argument("paths", nargs=-1)
-def ls2(paths, **kwargs):
+@click.option("--record", help="Show complete FBI record of latest files", is_flag=True)
+def ls2(paths, record, **kwargs):
     t0 =  time.time()
     t00 = time.time()
     for path in paths:
         for i, f in enumerate(fbi_records_under(path,  **kwargs)):
-        #for f in fbi_records_under(path, **kwargs):
-            if i % 10000 == 0:
-                rate = 10000/(time.time() - t0)
-                trate = i/(time.time() - t00)
-                t0 = time.time()
-                print(f'{i}: [{int(trate)} {int(rate)}]{f["path"]}')
-            print(f["path"])
+            if record:
+                print(json.dumps(f))
+            else:
+                print(f["path"])
 
 @click.command(cls=FilterCommand)
 @click.argument("paths", nargs=-1)
