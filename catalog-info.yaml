@@ -18,3 +18,4 @@ spec:
   dependsOn:
     - resource:default/elasticsearch-index-fbi
     - resource:default/elasticsearch-index-fbi-annotations
+    - component:default/fbi-annotations
