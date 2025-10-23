@@ -17,3 +17,4 @@ spec:
   system: system:default/nla
   dependsOn:
     - resource:default/elasticsearch-index-fbi
+    - resource:default/elasticsearch-index-fbi-annotations
