@@ -1,0 +1,19 @@
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: fbi-core
+  description: "Core file based indexing (FBI) operations used by the NLA and other CEDA archiving systems."
+  tags:
+    - "priority:high"
+    - "visibility:private"
+    - "manager:sam-pepler"
+    - "deputy-manager:matthew-paice"
+    - "review:passed"
+spec:
+  type: library
+  owner: group:default/developers
+  lifecycle: production
+  system: system:default/nla
+  dependsOn:
+    - resource:default/elasticsearch-index-fbi
