@@ -13,7 +13,7 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
 
 setup(
     name='fbi-core',
-    version='1.3.2',
+    version='1.3.3',
     description='File Based Index  (FBI) core tools',
     long_description=long_description,
 
