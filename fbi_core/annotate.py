@@ -6,14 +6,14 @@ from collections import defaultdict
 
 import elasticsearch
 import requests
-from ceda_es_client import CEDAElasticsearchClient
+from elasticsearch import Elasticsearch
 
-from .conf import APIKEY
+from .conf import APIKEY, ES_HOSTS
 
 if APIKEY:
-    es = CEDAElasticsearchClient(headers={"x-api-key": APIKEY})
+    es = elasticsearch.Elasticsearch(hosts=ES_HOSTS, headers={"x-api-key": APIKEY})
 else:
-    es = CEDAElasticsearchClient()
+    es = elasticsearch.Elasticsearch(hosts=ES_HOSTS)
 
 indexname = "fbi-annotations"
 
@@ -67,7 +67,7 @@ def get_moles_records():
     coll_url += "/?fields=ob_id,uuid,title,publicationState"
     coll_url += "&limit=10000"
     r = requests.get(coll_url, timeout=200)
-    
+
     collection_records_by_obid = {}
     for collection_rec in r.json()["results"]:
         collection_records_by_obid[collection_rec["ob_id"]] = collection_rec
