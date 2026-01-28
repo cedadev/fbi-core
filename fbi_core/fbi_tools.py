@@ -5,15 +5,16 @@ import re
 from datetime import datetime
 
 import elasticsearch
-from ceda_es_client import CEDAElasticsearchClient
+from elasticsearch import Elasticsearch
 from elasticsearch.helpers import scan
 
 from .conf import APIKEY
 
+ES_HOSTS = ["https://elasticsearch.ceda.ac.uk"]
 if APIKEY:
-    es = CEDAElasticsearchClient(headers={"x-api-key": APIKEY})
+    es = Elasticsearch(ES_HOSTS, headers={"x-api-key": APIKEY})
 else:
-    es = CEDAElasticsearchClient()
+    es = Elasticsearch(ES_HOSTS)
 
 indexname = "fbi-2022"
 
