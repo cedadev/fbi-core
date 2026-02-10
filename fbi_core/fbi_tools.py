@@ -571,7 +571,7 @@ def get_records_by_content(md5, filename=None, under=None, include_removed=False
         must.append({"term": {"name.keyword": {"value": filename}}})
 
     query = {"query": {"bool": {"must": must, "must_not": must_not}}}
-    results = es.search(index=indexname, body=query, request_timeout=90)
+    results = es.search(index=indexname, body=query, request_timeout=90, size=10000)
     records = []
     for r in results["hits"]["hits"]:
         records.append(r["_source"])
