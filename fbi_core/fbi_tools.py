@@ -10,7 +10,7 @@ from elasticsearch.helpers import scan
 
 from .conf import load_config
 
-api_key, host_es, es_index, es_annotation = load_config()
+api_key, host_es, es_index, es_annotation, spotlist = load_config()
 
 if api_key:
     es = Elasticsearch(host_es, headers={"x-api-key": api_key})
@@ -510,7 +510,7 @@ def fbi_listdir(
 
 
 def insert_item(record):
-    """Insert record by replaceing it"""
+    """Insert record by replacing it"""
     record_id = _create_id(record["path"])
     try:
         es.delete(index=indexname, id=record_id)
@@ -520,7 +520,7 @@ def insert_item(record):
 
 
 def update_item(record):
-    """Update a single document - overwrite feilds in record suplied."""
+    """Update a single document - overwrite fields in record suplied."""
     document = {"doc": record, "doc_as_upsert": True}
     es.update(
         index=indexname,
