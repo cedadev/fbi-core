@@ -7,10 +7,10 @@ from datetime import datetime
 import elasticsearch
 from elasticsearch.helpers import scan
 
-from .conf import APIKEY, ES_HOSTS
+from .conf import ES_HOSTS, PASSWORD, USERNAME
 
-if APIKEY:
-    es = elasticsearch.Elasticsearch(hosts=ES_HOSTS, headers={"x-api-key": APIKEY})
+if USERNAME:
+    es = elasticsearch.Elasticsearch(hosts=ES_HOSTS, basic_auth=(USERNAME, PASSWORD))
 else:
     es = elasticsearch.Elasticsearch(hosts=ES_HOSTS)
 
