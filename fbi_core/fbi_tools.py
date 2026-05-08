@@ -12,6 +12,7 @@ from .conf import APIKEY
 
 if APIKEY:
     es = CEDAElasticsearchClient(headers={"x-api-key": APIKEY})
+    es = CEDAElasticsearchClient(basic_auth=("elastic", ELASTIC_PASSWORD))
 else:
     es = CEDAElasticsearchClient()
 
