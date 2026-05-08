@@ -46,10 +46,8 @@ class FilterCommand(click.Command):
 
 @click.command(cls=FilterCommand)
 @click.argument("paths", nargs=-1)
-@click.option("--record", help="Show complete FBI record of latest files", is_flag=True)
+@click.option("--record", help="Show complete FBI record", is_flag=True)
 def ls2(paths, record, **kwargs):
-    t0 =  time.time()
-    t00 = time.time()
     for path in paths:
         for i, f in enumerate(fbi_records_under(path,  **kwargs)):
             if record:
