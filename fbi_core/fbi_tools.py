@@ -9,6 +9,7 @@ from elasticsearch.helpers import scan
 
 from .conf import APIKEY, ES_HOSTS
 
+ES_HOSTS = ["https://elasticsearch.ceda.ac.uk"]
 if APIKEY:
     es = elasticsearch.Elasticsearch(hosts=ES_HOSTS, headers={"x-api-key": APIKEY})
 else:
