@@ -12,10 +12,10 @@ from .conf import load_config
 
 api_key, host_es, es_index, es_annotation, spotlist = load_config()
 
-if api_key:
-    es = Elasticsearch(host_es, headers={"x-api-key": api_key})
+if USERNAME:
+    es = elasticsearch.Elasticsearch(hosts=ES_HOSTS, basic_auth=(USERNAME, PASSWORD))
 else:
-    es = Elasticsearch()
+    es = elasticsearch.Elasticsearch(hosts=ES_HOSTS)
 
 if es_index:
     indexname = es_index
@@ -37,9 +37,9 @@ def fbi_records(
     :param str after: paths after this are iterated over. Defaults to "/"
     :param str stop: iteration stops when the path is greater than or equal to this. Defaults to "~"
     :param int fetch_size: The number of records to request from elasticsearch at a time.
-    :param bool exclude_phenomena: remove the bulky phenomena attribute from 
+    :param bool exclude_phenomena: remove the bulky phenomena attribute from
                                    the record. Default is False.
-    :param str item_type: Item type for the records. Either "file", "dir" or "link". 
+    :param str item_type: Item type for the records. Either "file", "dir" or "link".
                           Defaults to all types.
 
     :return iterator[dict]: Yeilds FBI records as dictionaries.
@@ -216,7 +216,6 @@ def all_under_query(
     if blank:
         must.append({"term": {blank: {"value": ""}}})
 
-    
     if exclude_readmes:
         must_not.append({"prefix": {"name.keyword": {"value": "00README"}}})
         must_not.append({"prefix": {"name.keyword": {"value": "README"}}})
@@ -411,11 +410,11 @@ def archive_summary(
 
 def _split(splitlist, batch_size, **kwargs):
     """
-    Divide a list of directories into by adding subdirectories if there are too many 
+    Divide a list of directories into by adding subdirectories if there are too many
     items in a directory.
 
     :param list splitlist: A list of tuples containing a directory name and an item count.
-                           e.g. [("/x/y", 100)] may expand to [("/x/y/a", 50), 
+                           e.g. [("/x/y", 100)] may expand to [("/x/y/a", 50),
                            ("/x/y/b", 10), ("/x/y/c", 40),]
     """
     new_splits = []
@@ -576,7 +575,7 @@ def get_records_by_content(md5, filename=None, under=None, include_removed=False
         must.append({"term": {"name.keyword": {"value": filename}}})
 
     query = {"query": {"bool": {"must": must, "must_not": must_not}}}
-    results = es.search(index=indexname, body=query, request_timeout=90)
+    results = es.search(index=indexname, body=query, request_timeout=90, size=10000)
     records = []
     for r in results["hits"]["hits"]:
         records.append(r["_source"])

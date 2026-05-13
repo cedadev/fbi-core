@@ -72,7 +72,7 @@ def get_moles_records():
     coll_url += "/?fields=ob_id,uuid,title,publicationState"
     coll_url += "&limit=10000"
     r = requests.get(coll_url, timeout=200)
-    
+
     collection_records_by_obid = {}
     for collection_rec in r.json()["results"]:
         collection_records_by_obid[collection_rec["ob_id"]] = collection_rec

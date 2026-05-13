@@ -6,4 +6,5 @@ build
 *.egg-info
 dist
 dump_output
+.DS_Store
 /home/
