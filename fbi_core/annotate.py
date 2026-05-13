@@ -10,18 +10,17 @@ import requests
 
 from .conf import load_config
 
-api_key, host_es, es_index, es_annotation = load_config()
+user, password, host_es, es_index, es_annotation = load_config()
 
-if api_key:
-    es = Elasticsearch(host_es, headers={"x-api-key": api_key})
+if user and password:
+    es = Elasticsearch(host_es, basic_auth=(user, password), request_timeout=10)
 else:
-    es = Elasticsearch()
+    es = Elasticsearch(host_es)
 
 if es_annotation:
     indexname = es_annotation
 else:
     indexname = "fbi-annotations"
-
 
 def get_moles_records():
     """get moles info from catalogue"""

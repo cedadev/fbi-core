@@ -10,12 +10,12 @@ from elasticsearch.helpers import scan
 
 from .conf import load_config
 
-api_key, host_es, es_index, es_annotation, spotlist = load_config()
+user, password, host_es, es_index, es_annotation, spotlist = load_config()
 
-if USERNAME:
-    es = elasticsearch.Elasticsearch(hosts=ES_HOSTS, basic_auth=(USERNAME, PASSWORD))
+if user and password:
+    es = elasticsearch.Elasticsearch(hosts=host_es, basic_auth=(user, password), request_timeout=10)
 else:
-    es = elasticsearch.Elasticsearch(hosts=ES_HOSTS)
+    es = elasticsearch.Elasticsearch(hosts=host_es)
 
 if es_index:
     indexname = es_index

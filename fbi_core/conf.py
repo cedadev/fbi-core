@@ -1,31 +1,33 @@
 import os
 from requests import get, codes
+import yaml
 
 def load_config():
     try:
         conf_file = os.path.join(os.environ["HOME"], ".fbi.yml") # for prod in Linux based environment
     except:
-        conf_file = os.path.join("./home/", ".fbi.yml") # For testing in Windows environment, won't work in Linux/ Mac OS as "HOME" env variable exists. So another solution for debugging would be required.
+        conf_file = os.path.join("./home/", ".fbi.yml") # For testing
     if os.path.exists(conf_file):
         conf = yaml.load(open(conf_file), Loader=yaml.Loader)
-        api_key = conf["ES"]["api_key"]
+        username = conf["ES"]["user"]
+        password = conf["ES"]["password"]
         host_es = conf["ES"]["host"]
 
         if "index_fbi" in conf["ES"]:
             es_index = conf["ES"]["index_fbi"]
         else:
-            es_index = None
+            es_index = "fbi-2022"
 
         if "index_fbi_annotation" in conf["ES"]:
             es_annotation = conf["ES"]["index_fbi_annotation"]
         else:
-            es_annotation = None
+            es_annotation = "fbi-annotations"
     else:
-        api_key = None
-        host_es = None
-        es_index = None
-        es_annotation = None
-
+        username = None
+        password = None
+        host_es = "https://elasticsearch.ceda.ac.uk:443"
+        es_index = "fbi-2022"
+        es_annotation = "fbi-annotations"
 
     # Get spotlist on storage-d
     spotlist_url = "https://cedaarchiveapp.ceda.ac.uk/storage-d/spotlist"
@@ -47,5 +49,5 @@ def load_config():
     else:
         spotlist = spots_page.text.splitlines()
 
-    return api_key, host_es, es_index, es_annotation, spotlist
+    return username, password, host_es, es_index, es_annotation, spotlist
 
