@@ -13,9 +13,9 @@ from .conf import load_config
 user, password, host_es, es_index, es_annotation, spotlist = load_config()
 
 if user and password:
-    es = elasticsearch.Elasticsearch(hosts=host_es, basic_auth=(user, password), request_timeout=10)
+    es = Elasticsearch(hosts=host_es, basic_auth=(user, password), request_timeout=10)
 else:
-    es = elasticsearch.Elasticsearch(hosts=host_es)
+    es = Elasticsearch(hosts=host_es)
 
 if es_index:
     indexname = es_index
@@ -455,7 +455,7 @@ def splits(path, batch_size=10000000, **kwargs):
 
 def make_dirs(directory):
     """
-    Make FBI records for a diretory and any missing parent directories.
+    Make FBI records for a directory and any missing parent directories.
 
     :param str directory: The directory to add.
     """
