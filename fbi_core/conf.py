@@ -1,15 +1,53 @@
 import os
-
+from requests import get, codes
 import yaml
 
-conf_file = os.path.join(os.environ["HOME"], ".fbi.yml")
+def load_config():
+    try:
+        conf_file = os.path.join(os.environ["HOME"], ".fbi.yml") # for prod in Linux based environment
+    except:
+        conf_file = os.path.join("./home/", ".fbi.yml") # For testing
+    if os.path.exists(conf_file):
+        conf = yaml.load(open(conf_file), Loader=yaml.Loader)
+        username = conf["ES"]["user"]
+        password = conf["ES"]["password"]
+        host_es = conf["ES"]["host"]
 
-if os.path.exists(conf_file):
-    conf = yaml.load(open(conf_file), Loader=yaml.Loader)
-    USERNAME = conf["ES"]["username"]
-    PASSWORD = conf["ES"]["password"]
-    ES_HOSTS = conf["ES"].get("hosts", ["https://elasticsearch.ceda.ac.uk:443"])
-else:
-    USERNAME = None
-    PASSWORD = None
-    ES_HOSTS = ["https://elasticsearch.ceda.ac.uk:443"]
+        if "index_fbi" in conf["ES"]:
+            es_index = conf["ES"]["index_fbi"]
+        else:
+            es_index = "fbi-2022"
+
+        if "index_fbi_annotation" in conf["ES"]:
+            es_annotation = conf["ES"]["index_fbi_annotation"]
+        else:
+            es_annotation = "fbi-annotations"
+    else:
+        username = None
+        password = None
+        host_es = "https://elasticsearch.ceda.ac.uk:443"
+        es_index = "fbi-2022"
+        es_annotation = "fbi-annotations"
+
+    # Get spotlist on storage-d
+    spotlist_url = "https://cedaarchiveapp.ceda.ac.uk/storage-d/spotlist"
+    spots_page = get(spotlist_url)
+
+    if spots_page.status_code != codes['✓']:
+
+        print(spots_page.status_code + " Warning, error obtaining spotlist on storage-d  from https://cedaarchiveapp.ceda.ac.uk/storage-d/spotlist, using cached values from 05-Dec-2025")
+        try:
+            spotlist_file = os.path.join(os.environ["HOME"], "spotlist-cache.yml") # for prod in Linux based environment
+        except:
+            spotlist_file = os.path.join("./home/", "spotlist-cache.yml") # For testing in Windows environment, won't work in Linux/ Mac OS as "HOME" env variable exists. So another solution for debugging would be required.
+        if os.path.exists(spotlist_file):
+            spotlist = yaml.load(open(spotlist_file), Loader=yaml.Loader)
+            spotlist = spotlist["spotlist_cache"]
+
+        else:
+            spotlist = None
+    else:
+        spotlist = spots_page.text.splitlines()
+
+    return username, password, host_es, es_index, es_annotation, spotlist
+

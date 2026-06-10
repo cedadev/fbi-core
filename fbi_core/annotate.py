@@ -5,18 +5,22 @@ import re
 from collections import defaultdict
 
 import elasticsearch
-import requests
 from elasticsearch import Elasticsearch
+import requests
 
-from .conf import APIKEY, ES_HOSTS
+from .conf import load_config
 
-if APIKEY:
-    es = elasticsearch.Elasticsearch(hosts=ES_HOSTS, headers={"x-api-key": APIKEY})
+user, password, host_es, es_index, es_annotation = load_config()
+
+if user and password:
+    es = Elasticsearch(host_es, basic_auth=(user, password), request_timeout=10)
 else:
-    es = elasticsearch.Elasticsearch(hosts=ES_HOSTS)
+    es = Elasticsearch(host_es)
 
-indexname = "fbi-annotations"
-
+if es_annotation:
+    indexname = es_annotation
+else:
+    indexname = "fbi-annotations"
 
 def get_moles_records():
     """get moles info from catalogue"""

@@ -5,16 +5,22 @@ import re
 from datetime import datetime
 
 import elasticsearch
+from elasticsearch import Elasticsearch
 from elasticsearch.helpers import scan
 
-from .conf import ES_HOSTS, PASSWORD, USERNAME
+from .conf import load_config
 
-if USERNAME:
-    es = elasticsearch.Elasticsearch(hosts=ES_HOSTS, basic_auth=(USERNAME, PASSWORD))
+user, password, host_es, es_index, es_annotation, spotlist = load_config()
+
+if user and password:
+    es = Elasticsearch(hosts=host_es, basic_auth=(user, password), request_timeout=10)
 else:
-    es = elasticsearch.Elasticsearch(hosts=ES_HOSTS)
+    es = Elasticsearch(hosts=host_es)
 
-indexname = "fbi-2022"
+if es_index:
+    indexname = es_index
+else:
+    indexname = "fbi-2022"
 
 
 def fbi_records(
@@ -449,7 +455,7 @@ def splits(path, batch_size=10000000, **kwargs):
 
 def make_dirs(directory):
     """
-    Make FBI records for a diretory and any missing parent directories.
+    Make FBI records for a directory and any missing parent directories.
 
     :param str directory: The directory to add.
     """
@@ -503,7 +509,7 @@ def fbi_listdir(
 
 
 def insert_item(record):
-    """Insert record by replaceing it"""
+    """Insert record by replacing it"""
     record_id = _create_id(record["path"])
     try:
         es.delete(index=indexname, id=record_id)
@@ -513,7 +519,7 @@ def insert_item(record):
 
 
 def update_item(record):
-    """Update a single document - overwrite feilds in record suplied."""
+    """Update a single document - overwrite fields in record suplied."""
     document = {"doc": record, "doc_as_upsert": True}
     es.update(
         index=indexname,

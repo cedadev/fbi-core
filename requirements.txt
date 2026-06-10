@@ -1,6 +1,0 @@
-ceda-elasticsearch-client
-tabulate
-click
-pyyaml
-elasticsearch
-colorama
