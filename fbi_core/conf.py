@@ -5,10 +5,12 @@ import yaml
 def load_config():
     try:
         conf_file = os.path.join(os.environ["HOME"], ".fbi.yml") # for prod in Linux based environment
-    except:
-        conf_file = os.path.join("./home/", ".fbi.yml") # For testing
-    if os.path.exists(conf_file):
         conf = yaml.load(open(conf_file), Loader=yaml.Loader)
+    except:
+        conf_file = os.path.join("/home/", ".fbi.yml")
+        conf = yaml.load(open(conf_file), Loader=yaml.Loader) # For testing
+        
+    if os.path.exists(conf_file):
         username = conf["ES"]["user"]
         password = conf["ES"]["password"]
         host_es = conf["ES"]["host"]
