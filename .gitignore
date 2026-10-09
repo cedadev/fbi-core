@@ -8,3 +8,4 @@ dist
 dump_output
 .DS_Store
 /home/
+.vscode/settings.json
