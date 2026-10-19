@@ -161,6 +161,8 @@ def all_under_query(
     audited_before=None,
     corrupt_since=None,
     corrupt_before=None,
+    regex_date_since=None,
+    regex_date_before=None,
     with_field=None,
     without=None,
     blank=None,
@@ -268,6 +270,12 @@ def all_under_query(
 
     if corrupt_before is not None:
         must.append({"range": {"corrupted": {"lte": corrupt_before}}})
+
+    if regex_date_since is not None:
+        must.append({"range": {"regex_date": {"gte": regex_date_since}}})
+
+    if regex_date_before is not None:
+        must.append({"range": {"regex_date": {"lte": regex_date_before}}})
 
     if after and stop:
         must.append({"range": {"path.keyword": {"gt": after, "lte": stop}}})
