@@ -15,7 +15,7 @@ def load_config():
             conf = ""
 
     if os.path.exists(conf_file):
-        username = conf["ES"]["user"]
+        username = conf["ES"]["username"]
         password = conf["ES"]["password"]
         host_es = conf["ES"]["host"]
 
