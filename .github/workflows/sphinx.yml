@@ -1,34 +1,27 @@
-name: Sphinx build
+name: documentation
 
-on: push
+on: [push]
+
+permissions:
+  contents: write
 
 jobs:
-  build:
+  docs:
     runs-on: ubuntu-latest
     steps:
-    # Checkout and build the docs with sphinx
- 
-    - uses: actions/checkout@v2
-    - name: install git
-      run: |
-        sudo apt-get -y install git
-        PATH=$PATH:/usr/bin
-        git --version
-    - name: Build HTML
-      uses: ammaraskar/sphinx-action@master
-      with: 
-        docs-folder: "docs/"
-        pre-build-command: "sudo apt-get -y install git"
-    - name: Upload artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: html-docs
-        path: docs/build/html/
-    # Deploys to the gh-pages branch if the commit was made to main, the 
-    # gh-pages then takes over serving the html
-    - name: Deploy
-      uses: peaceiris/actions-gh-pages@v3
-      if: github.ref == 'refs/heads/main'
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: docs/build/html
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+      - name: Install dependencies
+        run: |
+          pip install sphinx sphinx_rtd_theme myst_parser
+      - name: Sphinx build
+        run: |
+          sphinx-build doc _build
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+        with:
+          publish_branch: gh-pages
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: _build/
+          force_orphan: true
