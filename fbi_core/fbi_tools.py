@@ -133,8 +133,9 @@ def where_is(name, fetch_size=10000, removed=False):
 def ls_query(path, size=10000, **kwargs):
     """ls for fbi
 
-    :param str path:
-    :param **kwrargs: Any options from all_under_query
+    :param str path: Path
+    :param int size: max records to return
+    :param kwrargs: Any options from all_under_query
     :return list[dict]: FBI records.
     """
     for i, rec in enumerate(fbi_records_under(path, **kwargs)):
