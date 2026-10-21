@@ -12,7 +12,7 @@ Welcome to fbi-core's documentation!
    
    generated/fbi_core
    usage
-   api
+   
 
 
 
