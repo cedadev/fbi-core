@@ -10,6 +10,7 @@ Welcome to fbi-core's documentation!
    :maxdepth: 2
    :caption: Contents:
    
+   generated/fbi_core
    usage
    api
 
