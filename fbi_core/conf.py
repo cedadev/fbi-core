@@ -15,7 +15,7 @@ def load_config():
             conf = ""
 
     if os.path.exists(conf_file):
-        username = conf["ES"]["user"]
+        user = conf["ES"]["user"]
         password = conf["ES"]["password"]
         host_es = conf["ES"]["host"]
 
@@ -29,7 +29,7 @@ def load_config():
         else:
             es_annotation = "fbi-annotations"
     else:
-        username = None
+        user = None
         password = None
         host_es = "https://elasticsearch.ceda.ac.uk:443"
         es_index = "fbi-2022"
@@ -55,5 +55,5 @@ def load_config():
     else:
         spotlist = spots_page.text.splitlines()
 
-    return username, password, host_es, es_index, es_annotation, spotlist
+    return user, password, host_es, es_index, es_annotation, spotlist
 
